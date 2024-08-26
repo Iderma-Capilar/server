@@ -1,6 +1,6 @@
 // En models/category.js
 import { DataTypes } from 'sequelize';
-import sequelize from '../models/database.js';
+import { sequelize } from "../index.js";
 // import Product from './product.js';
 
 const Category = sequelize.define(

@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../database.js';
+import { sequelize } from "../index.js";
 
 const Slider = sequelize.define('Slider', {
     id: {
