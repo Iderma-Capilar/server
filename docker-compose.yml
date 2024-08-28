@@ -1,14 +1,23 @@
-version: '3.8'
 services:
   idermadb:
-    image: postgres
-    env_file: .env
+    image: postgres:latest
+    container_name: iderma-api-db
     environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_DB=${POSTGRES_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_DB_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_DB_PASSWORD}
     ports:
-      - "${DB_LOCAL_PORT}:${DB_DOCKER_PORT}"
+      - ${FORWARD_DB_PORT:-5432}:5432
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "80:80"
+    depends_on:
+      - idermadb
 
   app:
     build: .
