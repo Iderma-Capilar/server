@@ -1,31 +1,35 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes } from "sequelize";
 import { sequelize } from "../index.js";
 
-const Slider = sequelize.define('Slider', {
+const Slider = sequelize.define(
+  "Slider",
+  {
     id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
     },
     title: {
-        type: DataTypes.STRING(150),
-        allowNull: false
+      type: DataTypes.STRING(150),
+      allowNull: false,
     },
     image: {
-        type: DataTypes.STRING(255)
+      type: DataTypes.STRING(255),
     },
     link: {
-        type: DataTypes.STRING(255)
+      type: DataTypes.STRING(255),
     },
     description: {
-        type: DataTypes.STRING(255)
+      type: DataTypes.STRING(255),
     },
     status: {
-        type: DataTypes.STRING(255)
-    }
-}, {
-    tableName: 'slider',
-    timestamps: false // Desactiva los timestamps si no los necesitas
-});
+      type: DataTypes.STRING(255),
+    },
+  },
+  {
+    tableName: "slider",
+    timestamps: false,
+  }
+);
 
 export default Slider;
