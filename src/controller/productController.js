@@ -3,7 +3,9 @@ import Product from "../database/models/product.js";
 
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.findAll();
+    const products = await Product.findAll({
+      include: [{ model: Category, as: "category" }],
+    });
     res.status(200).json({
       ok: true,
       status: 200,
@@ -22,19 +24,26 @@ export const getAllProducts = async (req, res) => {
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const category = await Category.findByPk(id);
-    if (!category) {
+    const product = await Product.findByPk(id, {
+      include: [{ model: Category, as: "category" }],
+    });
+    if (!product) {
       return res.status(404).json({
         ok: false,
         status: 404,
         message: "Product not found",
       });
     }
+    res.status(200).json({
+      ok: true,
+      status: 200,
+      data: product,
+    });
   } catch (error) {
     res.status(500).json({
       ok: false,
       status: 500,
-      message: "Error getting products",
+      message: "Error getting product",
       error: error.message,
     });
   }
@@ -43,6 +52,15 @@ export const getProductById = async (req, res) => {
 export const createProduct = async (req, res) => {
   try {
     const { name, image, miniature, description, categoryId } = req.body;
+
+    const category = await Category.findByPk(categoryId);
+    if (!category) {
+      return res.status(400).json({
+        ok: false,
+        status: 400,
+        message: "Invalid category ID",
+      });
+    }
 
     const newProduct = await Product.create({
       name,
@@ -80,6 +98,17 @@ export const updateProduct = async (req, res) => {
         status: 404,
         message: "Product not found",
       });
+    }
+
+    if (categoryId) {
+      const category = await Category.findByPk(categoryId);
+      if (!category) {
+        return res.status(400).json({
+          ok: false,
+          status: 400,
+          message: "Invalid category ID",
+        });
+      }
     }
 
     await product.update({

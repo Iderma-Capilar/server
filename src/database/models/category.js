@@ -7,6 +7,7 @@ const Category = sequelize.define(
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
+      autoIncrement: true,
       allowNull: false,
     },
     name: {
@@ -17,7 +18,7 @@ const Category = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
-    imageUrl: {
+    image: {
       type: DataTypes.STRING(255),
       allowNull: false,
     },

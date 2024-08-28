@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../index.js";
-import Category from "./category.js";
 
 const Product = sequelize.define(
   "Product",
@@ -25,15 +24,11 @@ const Product = sequelize.define(
     },
     categoryId: {
       type: DataTypes.INTEGER,
-      references: {
-        model: Category,
-        key: "id",
-      },
+      allowNull: false,
     },
   },
   {
     tableName: "product",
-    timestamps: false,
   }
 );
 

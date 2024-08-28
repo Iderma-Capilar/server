@@ -44,7 +44,6 @@ const Technology = sequelize.define(
   },
   {
     tableName: "technology",
-    timestamps: false,
   }
 );
 

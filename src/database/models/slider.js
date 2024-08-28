@@ -28,7 +28,6 @@ const Slider = sequelize.define(
   },
   {
     tableName: "slider",
-    timestamps: false,
   }
 );
 

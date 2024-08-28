@@ -9,7 +9,7 @@ const { NODE_LOCAL_PORT } = process.env;
 import routes from "./src/routes/index.js";
 import { connectToDatabase } from "./src/database/index.js";
 
-import "./src/database/models/associations.js";
+import "./src/database/models/associatons.js";
 
 const app = express();
 const server = createServer(app);
