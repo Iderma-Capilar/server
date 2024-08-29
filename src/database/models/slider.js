@@ -9,21 +9,32 @@ const Slider = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    title: {
+    title_1: {
       type: DataTypes.STRING(150),
       allowNull: false,
     },
-    image: {
+    description_1:{
       type: DataTypes.STRING(255),
+      allowNull: false,
     },
-    link: {
+    img_center: {
       type: DataTypes.STRING(255),
+      allowNull: false
     },
-    description: {
+    btn_link: {
       type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    title_2: {
+      type: DataTypes.STRING(150),
+      allowNull: true,
+    },
+    description_2:{
+      type: DataTypes.STRING(255),
+      allowNull: true,
     },
     status: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.BOOLEAN,
     },
   },
   {
