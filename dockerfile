@@ -1,8 +1,15 @@
 FROM node:20
 
-WORKDIR /mysqldb
+WORKDIR /app
+
 COPY package.json .
 RUN npm install
 
 COPY . .
-CMD npm start
+
+# Script para descargar datos
+COPY download-data.sh /usr/local/bin/download-data.sh
+RUN chmod +x /usr/local/bin/download-data.sh
+
+# Ejecutar el script al iniciar
+CMD ["/bin/sh", "-c", "download-data.sh && npm start"]
