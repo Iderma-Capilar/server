@@ -5,13 +5,13 @@ dotenv.config();
 const {
   POSTGRES_DB_USER,
   POSTGRES_DB_NAME,
-  POSTGRES_DB_HOST,
+  POSTGRES_DB_DOCKER_HOST,
   POSTGRES_DB_PASSWORD,
   POSTGRES_DB_DOCKER_PORT,
 } = process.env;
 
 const sequelize = new Sequelize({
-  host: POSTGRES_DB_HOST,
+  host: POSTGRES_DB_DOCKER_HOST,
   dialect: "postgres",
   logging: false,
   port: parseInt(POSTGRES_DB_DOCKER_PORT, 10),
@@ -20,11 +20,12 @@ const sequelize = new Sequelize({
   database: POSTGRES_DB_NAME,
 });
 
+
 const connectToDatabase = async () => {
   try {
     await sequelize.authenticate();
     console.log("Connected to database");
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ force: true });
     console.log("All models were synchronized successfully.");
   } catch (err) {
     console.error("Error connecting to the database:", err);
