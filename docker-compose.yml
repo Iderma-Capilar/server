@@ -1,6 +1,6 @@
 services:
   idermadb:
-    image: postgres:latest
+    image: postgres
     container_name: iderma-api-db
     environment:
       - POSTGRES_DB=${POSTGRES_DB_NAME}
@@ -8,26 +8,13 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backup:/docker-entrypoint-initdb.d
     ports:
-      - 5432:5432
-
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    ports:
-      - "80:80"
-    depends_on:
-      - idermadb
-
+      - "${POSTGRES_DB_LOCAL_PORT}:${POSTGRES_DB_DOCKER_PORT}"
   app:
     build: .
     depends_on:
       - idermadb
     ports:
       - "${NODE_LOCAL_PORT}:${NODE_DOCKER_PORT}"
-
 volumes:
   postgres_data:
