@@ -13,14 +13,38 @@ const Service = sequelize.define(
       type: DataTypes.STRING(150),
       allowNull: false,
     },
-    image: {
-      type: DataTypes.STRING(255),
+    slogan: {
+      type: DataTypes.STRING,
     },
-    miniature: {
+    image: {
       type: DataTypes.STRING(255),
     },
     description: {
       type: DataTypes.STRING(255),
+    },
+    main_treatment: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+    },
+    secondary_treatment: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+    },
+    benefits: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: true,
+    },
+    duration: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+    },
+    recommendations: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: true,
+    },
+    qa: {
+      type: DataTypes.JSONB,
+      allowNull: true,
     },
     categoryId: {
       type: DataTypes.INTEGER,
