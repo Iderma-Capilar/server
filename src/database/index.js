@@ -2,29 +2,23 @@ import dotenv from "dotenv";
 import { Sequelize } from "sequelize";
 dotenv.config();
 
-const {
-  POSTGRES_DB_USER,
-  POSTGRES_DB_NAME,
-  POSTGRES_DB_HOST,
-  POSTGRES_DB_PASSWORD,
-  POSTGRES_DB_DOCKER_PORT,
-} = process.env;
+const { DATABASE_URL } = process.env;
 
-const sequelize = new Sequelize({
-  host: POSTGRES_DB_HOST,
+const sequelize = new Sequelize(DATABASE_URL, {
   dialect: "postgres",
-  logging: false,
-  port: parseInt(POSTGRES_DB_DOCKER_PORT, 10),
-  username: POSTGRES_DB_USER,
-  password: POSTGRES_DB_PASSWORD,
-  database: POSTGRES_DB_NAME,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false, // Esto permite conexiones SSL autogeneradas
+    },
+  },
 });
 
 const connectToDatabase = async () => {
   try {
     await sequelize.authenticate();
     console.log("Connected to database");
-    await sequelize.sync({ force: true });
+    await sequelize.sync({ alter: true });
     console.log("All models were synchronized successfully.");
   } catch (err) {
     console.error("Error connecting to the database:", err);

@@ -1,20 +1,14 @@
 services:
-  idermadb:
-    image: postgres
-    container_name: iderma-api-db
+  app:
+    build: .
     environment:
       - POSTGRES_DB=${POSTGRES_DB_NAME}
       - POSTGRES_USER=${POSTGRES_DB_USER}
       - POSTGRES_PASSWORD=${POSTGRES_DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "${POSTGRES_DB_LOCAL_PORT}:${POSTGRES_DB_DOCKER_PORT}"
-  app:
-    build: .
-    depends_on:
-      - idermadb
+      - POSTGRES_HOST=${POSTGRES_DB_HOST}
+      - POSTGRES_PORT=${POSTGRES_DB_PORT}
     ports:
       - "${NODE_LOCAL_PORT}:${NODE_DOCKER_PORT}"
+
 volumes:
   postgres_data:
