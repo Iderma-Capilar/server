@@ -1,12 +1,13 @@
 import Category from "../database/models/category.js";
-import Product from "../database/models/product.js";
+import Service from "../database/models/services.js";
+
 // Obtener todas las categorías
 export const getAllCategories = async (req, res) => {
   try {
     const categories = await Category.findAll({
       include: [
         {
-          model: Product,
+          model: Service,
           as: "products",
         },
       ],
@@ -33,7 +34,7 @@ export const getCategoryById = async (req, res) => {
     const category = await Category.findByPk(id, {
       include: [
         {
-          model: Product,
+          model: Service,
           as: "products",
         },
       ],

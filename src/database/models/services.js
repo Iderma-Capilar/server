@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../index.js";
 
-const Product = sequelize.define(
-  "Product",
+const Service = sequelize.define(
+  "Service",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -28,8 +28,8 @@ const Product = sequelize.define(
     },
   },
   {
-    tableName: "product",
+    tableName: "service",
   }
 );
 
-export default Product;
+export default Service;

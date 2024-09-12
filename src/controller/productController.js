@@ -1,21 +1,21 @@
 import Category from "../database/models/category.js";
-import Product from "../database/models/product.js";
+import Service from "../database/models/services.js";
 
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.findAll({
+    const service = await Service.findAll({
       include: [{ model: Category, as: "category" }],
     });
     res.status(200).json({
       ok: true,
       status: 200,
-      data: products,
+      data: service,
     });
   } catch (error) {
     res.status(500).json({
       ok: false,
       status: 500,
-      message: "Error getting products",
+      message: "Error getting service",
       error: error.message,
     });
   }
@@ -24,20 +24,20 @@ export const getAllProducts = async (req, res) => {
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findByPk(id, {
+    const service = await Service.findByPk(id, {
       include: [{ model: Category, as: "category" }],
     });
-    if (!product) {
+    if (!service) {
       return res.status(404).json({
         ok: false,
         status: 404,
-        message: "Product not found",
+        message: "service not found",
       });
     }
     res.status(200).json({
       ok: true,
       status: 200,
-      data: product,
+      data: service,
     });
   } catch (error) {
     res.status(500).json({
@@ -90,13 +90,13 @@ export const updateProduct = async (req, res) => {
     const { id } = req.params;
     const { name, image, miniature, description, categoryId } = req.body;
 
-    const product = await Product.findByPk(id);
+    const service = await Service.findByPk(id);
 
-    if (!product) {
+    if (!service) {
       return res.status(404).json({
         ok: false,
         status: 404,
-        message: "Product not found",
+        message: "service not found",
       });
     }
 
@@ -111,7 +111,7 @@ export const updateProduct = async (req, res) => {
       }
     }
 
-    await product.update({
+    await service.update({
       name,
       image,
       miniature,
@@ -122,7 +122,7 @@ export const updateProduct = async (req, res) => {
     res.status(200).json({
       ok: true,
       status: 200,
-      data: product,
+      data: service,
     });
   } catch (error) {
     res.status(500).json({
@@ -138,28 +138,28 @@ export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const product = await Product.findByPk(id);
+    const service = await Service.findByPk(id);
 
-    if (!product) {
+    if (!service) {
       return res.status(404).json({
         ok: false,
         status: 404,
-        message: "Product not found",
+        message: "service not found",
       });
     }
 
-    await product.destroy();
+    await service.destroy();
 
     res.status(200).json({
       ok: true,
       status: 200,
-      message: "Product deleted successfully",
+      message: "service deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
       ok: false,
       status: 500,
-      message: "Error deleting product",
+      message: "Error deleting service",
       error: error.message,
     });
   }

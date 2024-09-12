@@ -9,7 +9,7 @@ const sequelize = new Sequelize(DATABASE_URL, {
   dialectOptions: {
     ssl: {
       require: true,
-      rejectUnauthorized: false, // Esto permite conexiones SSL autogeneradas
+      rejectUnauthorized: false, 
     },
   },
 });
