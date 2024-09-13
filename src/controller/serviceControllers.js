@@ -1,11 +1,39 @@
 import Category from "../database/models/category.js";
-import Service from "../database/models/services.js";
+import Service from "../database/models/service.js";
 
-export const getAllProducts = async (req, res) => {
+export const getAllServices = async (req, res) => {
   try {
-    const service = await Service.findAll({
+    const services = await Service.findAll({
       include: [{ model: Category, as: "category" }],
     });
+    res.status(200).json({
+      ok: true,
+      status: 200,
+      data: services,
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: "Error getting services",
+      error: error.message,
+    });
+  }
+};
+
+export const getServiceById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const service = await Service.findByPk(id, {
+      include: [{ model: Category, as: "category" }],
+    });
+    if (!service) {
+      return res.status(404).json({
+        ok: false,
+        status: 404,
+        message: "Service not found",
+      });
+    }
     res.status(200).json({
       ok: true,
       status: 200,
@@ -21,37 +49,21 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
-export const getProductById = async (req, res) => {
+export const createService = async (req, res) => {
   try {
-    const { id } = req.params;
-    const service = await Service.findByPk(id, {
-      include: [{ model: Category, as: "category" }],
-    });
-    if (!service) {
-      return res.status(404).json({
-        ok: false,
-        status: 404,
-        message: "service not found",
-      });
-    }
-    res.status(200).json({
-      ok: true,
-      status: 200,
-      data: service,
-    });
-  } catch (error) {
-    res.status(500).json({
-      ok: false,
-      status: 500,
-      message: "Error getting product",
-      error: error.message,
-    });
-  }
-};
-
-export const createProduct = async (req, res) => {
-  try {
-    const { name, image, miniature, description, categoryId } = req.body;
+    const {
+      name,
+      slogan,
+      image,
+      description,
+      main_treatment,
+      secondary_treatment,
+      benefits,
+      duration,
+      recommendations,
+      qa,
+      categoryId,
+    } = req.body;
 
     const category = await Category.findByPk(categoryId);
     if (!category) {
@@ -62,33 +74,51 @@ export const createProduct = async (req, res) => {
       });
     }
 
-    const newProduct = await Product.create({
+    const newService = await Service.create({
       name,
+      slogan,
       image,
-      miniature,
       description,
+      main_treatment,
+      secondary_treatment,
+      benefits,
+      duration,
+      recommendations,
+      qa,
       categoryId,
     });
 
     res.status(201).json({
       ok: true,
       status: 201,
-      data: newProduct,
+      data: newService,
     });
   } catch (error) {
     res.status(500).json({
       ok: false,
       status: 500,
-      message: "Error creating product",
+      message: "Error creating service",
       error: error.message,
     });
   }
 };
 
-export const updateProduct = async (req, res) => {
+export const updateService = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, image, miniature, description, categoryId } = req.body;
+    const {
+      name,
+      slogan,
+      image,
+      description,
+      main_treatment,
+      secondary_treatment,
+      benefits,
+      duration,
+      recommendations,
+      qa,
+      categoryId,
+    } = req.body;
 
     const service = await Service.findByPk(id);
 
@@ -96,7 +126,7 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({
         ok: false,
         status: 404,
-        message: "service not found",
+        message: "Service not found",
       });
     }
 
@@ -113,9 +143,15 @@ export const updateProduct = async (req, res) => {
 
     await service.update({
       name,
+      slogan,
       image,
-      miniature,
       description,
+      main_treatment,
+      secondary_treatment,
+      benefits,
+      duration,
+      recommendations,
+      qa,
       categoryId,
     });
 
@@ -128,13 +164,13 @@ export const updateProduct = async (req, res) => {
     res.status(500).json({
       ok: false,
       status: 500,
-      message: "Error updating product",
+      message: "Error updating service",
       error: error.message,
     });
   }
 };
 
-export const deleteProduct = async (req, res) => {
+export const deleteService = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -144,7 +180,7 @@ export const deleteProduct = async (req, res) => {
       return res.status(404).json({
         ok: false,
         status: 404,
-        message: "service not found",
+        message: "Service not found",
       });
     }
 
@@ -153,7 +189,7 @@ export const deleteProduct = async (req, res) => {
     res.status(200).json({
       ok: true,
       status: 200,
-      message: "service deleted successfully",
+      message: "Service deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
