@@ -1,5 +1,5 @@
 import Category from "../database/models/category.js";
-import Service from "../database/models/service.js";
+import Service from "../database/models/services.js";
 
 export const getAllServices = async (req, res) => {
   try {
