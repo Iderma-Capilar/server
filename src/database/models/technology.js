@@ -53,7 +53,7 @@ const Technology = sequelize.define("Technology", {
     autoIncrement: true,
     primaryKey: true,
   },
-  thumbnail: {
+  url_thumbnail: {
     type: DataTypes.STRING(255),
     allowNull: true,
   },
@@ -74,7 +74,7 @@ const Technology = sequelize.define("Technology", {
     allowNull: true,
   },
   procedures: {
-    type: DataTypes.TEXT,
+    type: DataTypes.TEXT, 
     allowNull: true,
   },
   recommendations: {

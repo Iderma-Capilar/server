@@ -13,7 +13,7 @@ const Testimonials = sequelize.define(
         type: DataTypes.STRING, //comment o video
         allowNull: false,
     },
-    comment: {
+    comment_short: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -22,10 +22,6 @@ const Testimonials = sequelize.define(
       allowNull: true,
     },
     thumbnail_username: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    thumbnail_video: {
       type: DataTypes.STRING,
       allowNull: true,
     },
