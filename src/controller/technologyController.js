@@ -1,4 +1,6 @@
-import Technology from "../database/models/technology.js";
+import ServiceImage from "../database/models/servicios/serviceImage.js";
+import ServiceVideo from "../database/models/servicios/serviceVideo.js";
+import Technology from "../database/models/technology/technology.js";
 
 // Crear una nueva tecnología
 export const createTechnology = async (req, res) => {
@@ -14,7 +16,12 @@ export const createTechnology = async (req, res) => {
 // Obtener todas las tecnologías
 export const getAllTechnologies = async (req, res) => {
   try {
-    const technologies = await Technology.findAll();
+    const technologies = await Technology.findAll({
+      include: [
+        { model: ServiceImage, as: "images" },
+        { model: ServiceVideo, as: "videos" },
+      ],
+    });
     res.status(200).json(technologies);
   } catch (error) {
     console.error("Error fetching technologies:", error);
@@ -26,7 +33,12 @@ export const getAllTechnologies = async (req, res) => {
 export const getTechnologyById = async (req, res) => {
   try {
     const { id } = req.params;
-    const technology = await Technology.findByPk(id);
+    const technology = await Technology.findByPk(id, {
+      include: [
+        { model: ServiceImage, as: "images" },
+        { model: ServiceVideo, as: "videos" },
+      ],
+    });
     if (technology) {
       res.status(200).json(technology);
     } else {
@@ -47,7 +59,12 @@ export const updateTechnology = async (req, res) => {
     });
 
     if (updated) {
-      const updatedTechnology = await Technology.findByPk(id);
+      const updatedTechnology = await Technology.findByPk(id, {
+        include: [
+          { model: ServiceImage, as: "images" },
+          { model: ServiceVideo, as: "videos" },
+        ],
+      });
       res.status(200).json(updatedTechnology);
     } else {
       res.status(404).json({ error: "Technology not found" });
@@ -67,7 +84,7 @@ export const deleteTechnology = async (req, res) => {
     });
 
     if (deleted) {
-      res.status(204).send(); 
+      res.status(204).send();
     } else {
       res.status(404).json({ error: "Technology not found" });
     }

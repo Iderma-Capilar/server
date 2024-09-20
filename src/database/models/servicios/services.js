@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import { sequelize } from "../index.js";
+import { sequelize } from "../../index.js";
 
 const Service = sequelize.define(
   "Service",
@@ -16,11 +16,8 @@ const Service = sequelize.define(
     slogan: {
       type: DataTypes.STRING,
     },
-    image: {
-      type: DataTypes.STRING(255),
-    },
     description: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
     },
     main_treatment: {
       type: DataTypes.JSONB,
@@ -28,10 +25,6 @@ const Service = sequelize.define(
     },
     secondary_treatment: {
       type: DataTypes.JSONB,
-      allowNull: true,
-    },
-    benefits: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true,
     },
     duration: {

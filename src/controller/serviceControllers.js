@@ -1,10 +1,14 @@
-import Category from "../database/models/category.js";
-import Service from "../database/models/services.js";
+import ServiceImage from "../database/models/servicios/serviceImage.js";
+import Service from "../database/models/servicios/services.js";
+import ServiceVideo from "../database/models/servicios/serviceVideo.js";
 
 export const getAllServices = async (req, res) => {
   try {
     const services = await Service.findAll({
-      include: [{ model: Category, as: "category" }],
+      include: [
+        { model: ServiceImage, as: "images" },
+        { model: ServiceVideo, as: "videos" },
+      ],
     });
     res.status(200).json({
       ok: true,
@@ -25,7 +29,10 @@ export const getServiceById = async (req, res) => {
   try {
     const { id } = req.params;
     const service = await Service.findByPk(id, {
-      include: [{ model: Category, as: "category" }],
+      include: [
+        { model: ServiceImage, as: "images" },
+        { model: ServiceVideo, as: "videos" },
+      ],
     });
     if (!service) {
       return res.status(404).json({
@@ -58,21 +65,10 @@ export const createService = async (req, res) => {
       description,
       main_treatment,
       secondary_treatment,
-      benefits,
       duration,
       recommendations,
       qa,
-      categoryId,
     } = req.body;
-
-    const category = await Category.findByPk(categoryId);
-    if (!category) {
-      return res.status(400).json({
-        ok: false,
-        status: 400,
-        message: "Invalid category ID",
-      });
-    }
 
     const newService = await Service.create({
       name,
@@ -81,11 +77,9 @@ export const createService = async (req, res) => {
       description,
       main_treatment,
       secondary_treatment,
-      benefits,
       duration,
       recommendations,
       qa,
-      categoryId,
     });
 
     res.status(201).json({
@@ -113,11 +107,9 @@ export const updateService = async (req, res) => {
       description,
       main_treatment,
       secondary_treatment,
-      benefits,
       duration,
       recommendations,
       qa,
-      categoryId,
     } = req.body;
 
     const service = await Service.findByPk(id);
@@ -130,17 +122,6 @@ export const updateService = async (req, res) => {
       });
     }
 
-    if (categoryId) {
-      const category = await Category.findByPk(categoryId);
-      if (!category) {
-        return res.status(400).json({
-          ok: false,
-          status: 400,
-          message: "Invalid category ID",
-        });
-      }
-    }
-
     await service.update({
       name,
       slogan,
@@ -148,11 +129,9 @@ export const updateService = async (req, res) => {
       description,
       main_treatment,
       secondary_treatment,
-      benefits,
       duration,
       recommendations,
       qa,
-      categoryId,
     });
 
     res.status(200).json({
