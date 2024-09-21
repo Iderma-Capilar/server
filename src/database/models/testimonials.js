@@ -10,8 +10,8 @@ const Testimonials = sequelize.define(
       primaryKey: true,
     },
     type_testimonial: {
-        type: DataTypes.STRING, //comment o video
-        allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     comment_short: {
       type: DataTypes.STRING,
