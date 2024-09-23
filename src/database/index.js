@@ -17,7 +17,6 @@ const { DATABASE_URL } = process.env;
 //   },
 // });
 
-
 // ENTORNO DE LOCAL DE DESARROLLO
 // -----------------------------------
 
