@@ -19,14 +19,6 @@ const Service = sequelize.define(
     description: {
       type: DataTypes.TEXT,
     },
-    main_treatment: {
-      type: DataTypes.JSONB,
-      allowNull: false,
-    },
-    secondary_treatment: {
-      type: DataTypes.JSONB,
-      allowNull: true,
-    },
     duration: {
       type: DataTypes.JSONB,
       allowNull: true,

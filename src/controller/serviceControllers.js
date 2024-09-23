@@ -1,8 +1,11 @@
 import QuestionAnswer from "../database/models/qa/qa.js";
+import MainTreatment from "../database/models/servicios/mainTreatment.js";
+import SecondaryTreatment from "../database/models/servicios/secondaryTreatment.js";
 import ServiceImage from "../database/models/servicios/serviceImage.js";
 import Service from "../database/models/servicios/services.js";
 import ServiceVideo from "../database/models/servicios/serviceVideo.js";
 
+//--------------------------------------------------------------------------------------------
 export const getAllServices = async (req, res) => {
   try {
     const services = await Service.findAll({
@@ -10,6 +13,8 @@ export const getAllServices = async (req, res) => {
         { model: ServiceImage, as: "images" },
         { model: ServiceVideo, as: "videos" },
         { model: QuestionAnswer, as: "qa" },
+        { model: MainTreatment, as: "mainTreatments" },
+        { model: SecondaryTreatment, as: "secondaryTreatment" },
       ],
     });
 
@@ -28,6 +33,8 @@ export const getAllServices = async (req, res) => {
   }
 };
 
+//--------------------------------------------------------------------------------------------
+
 export const getServiceById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -35,6 +42,9 @@ export const getServiceById = async (req, res) => {
       include: [
         { model: ServiceImage, as: "images" },
         { model: ServiceVideo, as: "videos" },
+        { model: QuestionAnswer, as: "qa" },
+        { model: MainTreatment, as: "mainTreatments" },
+        { model: SecondaryTreatment, as: "secondaryTreatment" },
       ],
     });
     if (!service) {
@@ -59,6 +69,8 @@ export const getServiceById = async (req, res) => {
   }
 };
 
+//--------------------------------------------------------------------------------------------
+
 // CREAR SERVICIO NUEVO
 export const createService = async (req, res) => {
   try {
@@ -66,13 +78,13 @@ export const createService = async (req, res) => {
       name,
       slogan,
       description,
-      main_treatment,
-      secondary_treatment,
       duration,
       recommendations,
       videos,
       images,
       questions,
+      mainTreatments,
+      secondaryTreatments,
     } = req.body;
 
     // Validar campos obligatorios
@@ -85,20 +97,24 @@ export const createService = async (req, res) => {
     }
 
     // Validar el tratamiento principal
-    if (!main_treatment || !main_treatment.type) {
+    if (
+      !mainTreatments ||
+      !Array.isArray(mainTreatments) ||
+      mainTreatments.length === 0
+    ) {
       return res.status(400).json({
         ok: false,
         status: 400,
-        message: "Main treatment and its type are required.",
+        message: "At least one main treatment is required.",
       });
     }
 
     // Validar el tratamiento secundario si está presente
-    if (secondary_treatment && !secondary_treatment.type) {
+    if (secondaryTreatments && !Array.isArray(secondaryTreatments)) {
       return res.status(400).json({
         ok: false,
         status: 400,
-        message: "Secondary treatment type is required if provided.",
+        message: "Secondary treatments must be an array if provided.",
       });
     }
 
@@ -107,8 +123,6 @@ export const createService = async (req, res) => {
       name,
       slogan,
       description,
-      main_treatment,
-      secondary_treatment,
       duration,
       recommendations,
     });
@@ -120,6 +134,42 @@ export const createService = async (req, res) => {
           serviceId: newService.id,
           videoUrl: video.videoUrl,
           description: video.description,
+        });
+      }
+    }
+
+    // Crear los tratamientos principales asociados
+    for (const treatment of mainTreatments) {
+      if (!treatment.type || !treatment.duration) {
+        return res.status(400).json({
+          ok: false,
+          status: 400,
+          message: "Each main treatment must have a type and duration.",
+        });
+      }
+
+      await MainTreatment.create({
+        serviceId: newService.id,
+        type: treatment.type,
+        duration: treatment.duration,
+      });
+    }
+
+    // Crear los tratamientos secundarios asociados
+    if (secondaryTreatments) {
+      for (const treatment of secondaryTreatments) {
+        if (!treatment.type || !treatment.duration) {
+          return res.status(400).json({
+            ok: false,
+            status: 400,
+            message: "Each secondary treatment must have a type and duration.",
+          });
+        }
+
+        await SecondaryTreatment.create({
+          serviceId: newService.id,
+          type: treatment.type,
+          duration: treatment.duration,
         });
       }
     }
@@ -161,6 +211,8 @@ export const createService = async (req, res) => {
     });
   }
 };
+
+//--------------------------------------------------------------------------------------------
 
 export const updateService = async (req, res) => {
   try {
@@ -213,6 +265,8 @@ export const updateService = async (req, res) => {
     });
   }
 };
+
+//--------------------------------------------------------------------------------------------
 
 export const deleteService = async (req, res) => {
   try {

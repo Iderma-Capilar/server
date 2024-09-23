@@ -1,4 +1,6 @@
 import QuestionAnswer from "./qa/qa.js";
+import MainTreatment from "./servicios/mainTreatment.js";
+import SecondaryTreatment from "./servicios/secondaryTreatment.js";
 import ServiceImage from "./servicios/serviceImage.js";
 import Service from "./servicios/services.js";
 import ServiceVideo from "./servicios/serviceVideo.js";
@@ -25,6 +27,14 @@ Service.hasMany(ServiceVideo, {
 Service.hasMany(QuestionAnswer, {
   foreignKey: "qaId",
   as: "qa",
+});
+Service.hasMany(MainTreatment, {
+  foreignKey: "serviceId",
+  as: "mainTreatments",
+});
+Service.hasMany(SecondaryTreatment, {
+  foreignKey: "serviceId",
+  as: "secondaryTreatment",
 });
 
 ServiceImage.belongsTo(Service, { foreignKey: "serviceId" });
