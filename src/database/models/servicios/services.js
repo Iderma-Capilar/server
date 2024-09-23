@@ -20,11 +20,11 @@ const Service = sequelize.define(
       type: DataTypes.TEXT,
     },
     duration: {
-      type: DataTypes.JSONB,
+      type: DataTypes.JSON,
       allowNull: true,
     },
     recommendations: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
+      type: DataTypes.JSON,
       allowNull: true,
     },
   },
