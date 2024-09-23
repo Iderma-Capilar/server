@@ -1,3 +1,4 @@
+import QuestionAnswer from "./qa/qa.js";
 import ServiceImage from "./servicios/serviceImage.js";
 import Service from "./servicios/services.js";
 import ServiceVideo from "./servicios/serviceVideo.js";
@@ -13,7 +14,18 @@ Technology.hasMany(TechnologyVideo, {
   foreignKey: "technologyId",
   as: "videos",
 });
-Service.hasMany(ServiceImage, { foreignKey: "serviceId" });
-Service.hasMany(ServiceVideo, { foreignKey: "serviceId" });
+Service.hasMany(ServiceImage, {
+  foreignKey: "serviceId",
+  as: "images",
+});
+Service.hasMany(ServiceVideo, {
+  foreignKey: "serviceId",
+  as: "videos",
+});
+Service.hasMany(QuestionAnswer, {
+  foreignKey: "qaId",
+  as: "qa",
+});
+
 ServiceImage.belongsTo(Service, { foreignKey: "serviceId" });
 ServiceVideo.belongsTo(Service, { foreignKey: "serviceId" });

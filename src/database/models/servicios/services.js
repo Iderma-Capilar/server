@@ -35,14 +35,6 @@ const Service = sequelize.define(
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true,
     },
-    qa: {
-      type: DataTypes.JSONB,
-      allowNull: true,
-    },
-    categoryId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
   },
   {
     tableName: "service",
