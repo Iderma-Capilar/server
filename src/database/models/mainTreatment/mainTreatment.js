@@ -1,7 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../index.js";
-import Service from "./services.js";
-
+import Service from "../servicios/services.js";
 
 const MainTreatment = sequelize.define(
   "MainTreatment",
@@ -23,7 +22,15 @@ const MainTreatment = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    duration: {
+    effectiveness: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    recovery_time: {
       type: DataTypes.STRING,
       allowNull: false,
     },

@@ -16,7 +16,7 @@ const ServiceVideo = sequelize.define("ServiceVideo", {
     },
     allowNull: false,
   },
-  videoUrl: {
+  url: {
     type: DataTypes.TEXT,
     allowNull: false,
   },

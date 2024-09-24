@@ -1,6 +1,8 @@
 import Benefit from "./benefit/benefit.js";
 import QuestionAnswer from "./qa/qa.js";
-import MainTreatment from "./servicios/mainTreatment.js";
+import Duration from "./duration/duration.js";
+import MainTreatment from "./mainTreatment/mainTreatment.js";
+import Recommendations from "./servicios/recommendations.js";
 import SecondaryTreatment from "./servicios/secondaryTreatment.js";
 import ServiceImage from "./servicios/serviceImage.js";
 import Service from "./servicios/services.js";
@@ -66,6 +68,66 @@ SecondaryTreatment.belongsTo(Service, {
   foreignKey: "serviceId",
   as: "service",
 });
+
+// Nueva relación con Recommendations
+Service.hasMany(Recommendations, {
+  foreignKey: "serviceId",
+  as: "recommendations",
+});
+Recommendations.belongsTo(Service, {
+  foreignKey: "serviceId",
+  as: "service",
+});
+
+// Nueva relación con Duration
+Service.hasMany(Duration, {
+  foreignKey: "serviceId",
+  as: "durations",
+});
+Duration.belongsTo(Service, {
+  foreignKey: "serviceId",
+  as: "service",
+});
+
+// MAIN TREATMENT
+// --------------------------------------------------------------
+// Relación con Duration
+MainTreatment.hasMany(Duration, {
+  foreignKey: "mainTreatmentId",
+  as: "durations",
+});
+Duration.belongsTo(MainTreatment, {
+  foreignKey: "mainTreatmentId",
+  as: "mainTreatment",
+});
+
+MainTreatment.hasMany(Technology, {
+  foreignKey: "mainTreatmentId",
+  as: "technologies",
+});
+Technology.belongsTo(MainTreatment, {
+  foreignKey: "mainTreatmentId",
+  as: "mainTreatment",
+});
+
+MainTreatment.hasMany(SecondaryTreatment, {
+  foreignKey: "mainTreatmentId",
+  as: "secondaryTreatments",
+});
+SecondaryTreatment.belongsTo(MainTreatment, {
+  foreignKey: "mainTreatmentId",
+  as: "mainTreatment",
+});
+
+// Relación con Testimonios
+// MainTreatment.hasMany(Testimonial, {
+//   foreignKey: "mainTreatmentId",
+//   as: "testimonials",
+// });
+// Testimonial.belongsTo(MainTreatment, {
+//   foreignKey: "mainTreatmentId",
+//   as: "mainTreatmentTestimonials",
+// });
 
 // COMPARTIDO
 // --------------------------------------------------------------

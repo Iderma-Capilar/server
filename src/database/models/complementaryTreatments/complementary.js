@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../index.js";
 
-const Service = sequelize.define(
-  "Service",
+const ComplementaryTreatment = sequelize.define(
+  "ComplementaryTreatment",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -13,16 +13,13 @@ const Service = sequelize.define(
       type: DataTypes.STRING(150),
       allowNull: false,
     },
-    slogan: {
-      type: DataTypes.STRING,
-    },
     description: {
       type: DataTypes.TEXT,
     },
   },
   {
-    tableName: "service",
+    tableName: "complementary_treatment",
   }
 );
 
-export default Service;
+export default ComplementaryTreatment;

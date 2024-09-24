@@ -18,7 +18,7 @@ const ServiceImage = sequelize.define(
       },
       allowNull: false,
     },
-    imagesUrl: {
+    url: {
       type: DataTypes.STRING,
       allowNull: false,
     },
