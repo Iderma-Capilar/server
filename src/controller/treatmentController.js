@@ -1,5 +1,6 @@
 import { sequelize } from "../database/index.js";
 import MainTreatment from "../database/models/mainTreatment/mainTreatment.js";
+import Service from "../database/models/servicios/services.js";
 
 // CREAR TRATAMIENTO PRINCIPAL
 export const createMainTreatment = async (req, res) => {
@@ -62,7 +63,7 @@ export const getAllMainTreatments = async (req, res) => {
     const mainTreatments = await MainTreatment.findAll({
       include: {
         model: Service,
-        as: "service", // Cambia esto según el alias que estés usando
+        as: "service",
       },
     });
 
@@ -89,7 +90,7 @@ export const getMainTreatmentById = async (req, res) => {
     const mainTreatment = await MainTreatment.findByPk(id, {
       include: {
         model: Service,
-        as: "service", // Cambia esto según el alias que estés usando
+        as: "service",
       },
     });
 
