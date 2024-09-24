@@ -1,15 +1,15 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../index.js";
 
-const QuestionAnswer = sequelize.define(
-  "ServiceQA",
+const Benefit = sequelize.define(
+  "Benefit",
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    qaType: {
+    benefit_type: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -17,18 +17,18 @@ const QuestionAnswer = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    question: {
+    description: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    answer: {
-      type: DataTypes.TEXT,
-      allowNull: true,
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
   },
   {
-    tableName: "service_qa",
+    tableName: "benefit",
   }
 );
 
-export default QuestionAnswer;
+export default Benefit;

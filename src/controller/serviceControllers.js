@@ -1,3 +1,5 @@
+import { sequelize } from "../database/index.js";
+import Benefit from "../database/models/benefit/benefit.js";
 import QuestionAnswer from "../database/models/qa/qa.js";
 import MainTreatment from "../database/models/servicios/mainTreatment.js";
 import SecondaryTreatment from "../database/models/servicios/secondaryTreatment.js";
@@ -14,7 +16,8 @@ export const getAllServices = async (req, res) => {
         { model: ServiceVideo, as: "videos" },
         { model: QuestionAnswer, as: "qa" },
         { model: MainTreatment, as: "mainTreatments" },
-        { model: SecondaryTreatment, as: "secondaryTreatment" },
+        { model: SecondaryTreatment, as: "secondaryTreatments" },
+        { model: Benefit, as: "serviceBenefits" },
       ],
     });
 
@@ -44,7 +47,8 @@ export const getServiceById = async (req, res) => {
         { model: ServiceVideo, as: "videos" },
         { model: QuestionAnswer, as: "qa" },
         { model: MainTreatment, as: "mainTreatments" },
-        { model: SecondaryTreatment, as: "secondaryTreatment" },
+        { model: SecondaryTreatment, as: "secondaryTreatments" },
+        { model: Benefit, as: "serviceBenefits" },
       ],
     });
     if (!service) {
@@ -72,7 +76,160 @@ export const getServiceById = async (req, res) => {
 //--------------------------------------------------------------------------------------------
 
 // CREAR SERVICIO NUEVO
+// export const createService = async (req, res) => {
+//   try {
+//     const {
+//       name,
+//       slogan,
+//       description,
+//       duration,
+//       recommendations,
+//       videos,
+//       images,
+//       questions,
+//       mainTreatments,
+//       secondaryTreatments,
+//       benefits,
+//     } = req.body;
+
+//     // Validar campos obligatorios
+//     if (!name || !description) {
+//       return res.status(400).json({
+//         ok: false,
+//         status: 400,
+//         message: "Name and description are required.",
+//       });
+//     }
+
+//     // Validar el tratamiento principal
+//     if (
+//       !mainTreatments ||
+//       !Array.isArray(mainTreatments) ||
+//       mainTreatments.length === 0
+//     ) {
+//       return res.status(400).json({
+//         ok: false,
+//         status: 400,
+//         message: "At least one main treatment is required.",
+//       });
+//     }
+
+//     // Validar el tratamiento secundario si está presente
+//     if (secondaryTreatments && !Array.isArray(secondaryTreatments)) {
+//       return res.status(400).json({
+//         ok: false,
+//         status: 400,
+//         message: "Secondary treatments must be an array if provided.",
+//       });
+//     }
+
+//     // Crear el nuevo servicio
+//     const newService = await Service.create({
+//       name,
+//       slogan,
+//       description,
+//       duration,
+//       recommendations,
+//     });
+
+//     // Crear los videos asociados
+//     if (videos && Array.isArray(videos)) {
+//       for (const video of videos) {
+//         await ServiceVideo.create({
+//           serviceId: newService.id,
+//           videoUrl: video.videoUrl,
+//           description: video.description,
+//         });
+//       }
+//     }
+
+//     // Crear los tratamientos principales asociados
+//     for (const treatment of mainTreatments) {
+//       if (!treatment.type || !treatment.duration) {
+//         return res.status(400).json({
+//           ok: false,
+//           status: 400,
+//           message: "Each main treatment must have a type and duration.",
+//         });
+//       }
+
+//       await MainTreatment.create({
+//         serviceId: newService.id,
+//         type: treatment.type,
+//         duration: treatment.duration,
+//       });
+//     }
+
+//     // Crear los tratamientos secundarios asociados
+//     if (secondaryTreatments) {
+//       for (const treatment of secondaryTreatments) {
+//         if (!treatment.type || !treatment.duration) {
+//           return res.status(400).json({
+//             ok: false,
+//             status: 400,
+//             message: "Each secondary treatment must have a type and duration.",
+//           });
+//         }
+
+//         await SecondaryTreatment.create({
+//           serviceId: newService.id,
+//           type: treatment.type,
+//           duration: treatment.duration,
+//         });
+//       }
+//     }
+
+//     // Crear las imágenes asociadas
+//     if (images && Array.isArray(images)) {
+//       for (const image of images) {
+//         await ServiceImage.create({
+//           serviceId: newService.id,
+//           imagesUrl: image.imagesUrl,
+//           altText: image.altText,
+//         });
+//       }
+//     }
+
+//     // Crear las preguntas y respuestas
+//     if (questions && Array.isArray(questions)) {
+//       for (const question of questions) {
+//         await QuestionAnswer.create({
+//           qaType: "service",
+//           productId: newService.id,
+//           question: question.question,
+//           answer: question.answer,
+//         });
+//       }
+//     }
+
+//     // Crear los beneficios asociados
+//     if (benefits && Array.isArray(benefits)) {
+//       for (const benefit of benefits) {
+//         await Benefit.create({
+//           benefit_type: "service",
+//           productId: newService.id,
+//           title: benefit.title,
+//           description: benefit.description,
+//         });
+//       }
+//     }
+
+//     res.status(201).json({
+//       ok: true,
+//       status: 201,
+//       data: newService,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       ok: false,
+//       status: 500,
+//       message: "Error creating service",
+//       error: error.message,
+//     });
+//   }
+// };
 export const createService = async (req, res) => {
+  const transaction = await sequelize.transaction(); // Iniciar transacción
   try {
     const {
       name,
@@ -80,11 +237,12 @@ export const createService = async (req, res) => {
       description,
       duration,
       recommendations,
-      videos,
-      images,
-      questions,
-      mainTreatments,
-      secondaryTreatments,
+      videos = [],
+      images = [],
+      questions = [],
+      mainTreatments = [],
+      secondaryTreatments = [],
+      benefits = [],
     } = req.body;
 
     // Validar campos obligatorios
@@ -96,12 +254,7 @@ export const createService = async (req, res) => {
       });
     }
 
-    // Validar el tratamiento principal
-    if (
-      !mainTreatments ||
-      !Array.isArray(mainTreatments) ||
-      mainTreatments.length === 0
-    ) {
+    if (!mainTreatments.length) {
       return res.status(400).json({
         ok: false,
         status: 400,
@@ -109,100 +262,75 @@ export const createService = async (req, res) => {
       });
     }
 
-    // Validar el tratamiento secundario si está presente
-    if (secondaryTreatments && !Array.isArray(secondaryTreatments)) {
-      return res.status(400).json({
-        ok: false,
-        status: 400,
-        message: "Secondary treatments must be an array if provided.",
-      });
-    }
-
     // Crear el nuevo servicio
-    const newService = await Service.create({
-      name,
-      slogan,
-      description,
-      duration,
-      recommendations,
+    const newService = await Service.create(
+      {
+        name,
+        slogan,
+        description,
+        duration,
+        recommendations,
+      },
+      { transaction }
+    );
+
+    // Funciones para crear asociaciones
+    const createAssociations = async (
+      Model,
+      data,
+      serviceId,
+      extraFields = {}
+    ) => {
+      if (data.length) {
+        await Model.bulkCreate(
+          data.map((item) => ({ ...item, serviceId, ...extraFields })),
+          { transaction }
+        );
+      }
+    };
+
+    // Crear asociaciones: videos, imágenes, preguntas, tratamientos, beneficios
+    await createAssociations(ServiceVideo, videos, newService.id);
+    await createAssociations(ServiceImage, images, newService.id);
+    await createAssociations(QuestionAnswer, questions, newService.id, {
+      qaType: "service",
+      productId: newService.id,
+    });
+    await createAssociations(MainTreatment, mainTreatments, newService.id);
+    await createAssociations(
+      SecondaryTreatment,
+      secondaryTreatments,
+      newService.id
+    );
+    await createAssociations(Benefit, benefits, newService.id, {
+      benefit_type: "service",
+      productId: newService.id,
     });
 
-    // Crear los videos asociados
-    if (videos && Array.isArray(videos)) {
-      for (const video of videos) {
-        await ServiceVideo.create({
-          serviceId: newService.id,
-          videoUrl: video.videoUrl,
-          description: video.description,
-        });
-      }
-    }
+    // Confirmar transacción
+    await transaction.commit();
 
-    // Crear los tratamientos principales asociados
-    for (const treatment of mainTreatments) {
-      if (!treatment.type || !treatment.duration) {
-        return res.status(400).json({
-          ok: false,
-          status: 400,
-          message: "Each main treatment must have a type and duration.",
-        });
-      }
-
-      await MainTreatment.create({
-        serviceId: newService.id,
-        type: treatment.type,
-        duration: treatment.duration,
-      });
-    }
-
-    // Crear los tratamientos secundarios asociados
-    if (secondaryTreatments) {
-      for (const treatment of secondaryTreatments) {
-        if (!treatment.type || !treatment.duration) {
-          return res.status(400).json({
-            ok: false,
-            status: 400,
-            message: "Each secondary treatment must have a type and duration.",
-          });
-        }
-
-        await SecondaryTreatment.create({
-          serviceId: newService.id,
-          type: treatment.type,
-          duration: treatment.duration,
-        });
-      }
-    }
-
-    // Crear las imágenes asociadas
-    if (images && Array.isArray(images)) {
-      for (const image of images) {
-        await ServiceImage.create({
-          serviceId: newService.id,
-          imagesUrl: image.imagesUrl,
-          altText: image.altText,
-        });
-      }
-    }
-
-    // Crear las preguntas y respuestas
-    if (questions && Array.isArray(questions)) {
-      for (const question of questions) {
-        await QuestionAnswer.create({
-          qaType: "service",
-          qaId: newService.id,
-          question: question.question,
-          answer: question.answer,
-        });
-      }
-    }
+    // Obtener servicio con las asociaciones
+    const serviceWithAssociations = await Service.findByPk(newService.id, {
+      include: [
+        { model: ServiceImage, as: "images" },
+        { model: ServiceVideo, as: "videos" },
+        { model: QuestionAnswer, as: "qa" },
+        { model: MainTreatment, as: "mainTreatments" },
+        { model: SecondaryTreatment, as: "secondaryTreatments" },
+        { model: Benefit, as: "serviceBenefits" },
+      ],
+    });
 
     res.status(201).json({
       ok: true,
       status: 201,
-      data: newService,
+      data: serviceWithAssociations,
     });
   } catch (error) {
+    if (!transaction.finished) {
+      await transaction.rollback();
+    }
     res.status(500).json({
       ok: false,
       status: 500,
