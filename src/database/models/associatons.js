@@ -166,3 +166,16 @@ Benefit.belongsTo(Technology, {
   foreignKey: "productId",
   as: "technology",
 });
+
+// MUCHOS A MUCHOS
+// --------------------------------------------------------------
+Service.belongsToMany(MainTreatment, {
+  through: "ServiceMainTreatment",
+  as: "associatedMainTreatments",
+  foreignKey: "serviceId",
+});
+MainTreatment.belongsToMany(Service, {
+  through: "ServiceMainTreatment",
+  as: "services",
+  foreignKey: "mainTreatmentId",
+});

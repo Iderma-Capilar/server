@@ -1,22 +1,14 @@
 import { sequelize } from "../database/index.js";
 import MainTreatment from "../database/models/mainTreatment/mainTreatment.js";
-import Service from "../database/models/servicios/services.js";
 
 // CREAR TRATAMIENTO PRINCIPAL
 export const createMainTreatment = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { serviceId, type, effectiveness, description, recovery_time } =
-      req.body;
+    const { type, effectiveness, description, recovery_time } = req.body;
 
     // Validar campos obligatorios
-    if (
-      !serviceId ||
-      !type ||
-      !effectiveness ||
-      !description ||
-      !recovery_time
-    ) {
+    if (!type || !effectiveness || !description || !recovery_time) {
       return res.status(400).json({
         ok: false,
         status: 400,
@@ -27,7 +19,6 @@ export const createMainTreatment = async (req, res) => {
     // Crear el nuevo tratamiento principal
     const newMainTreatment = await MainTreatment.create(
       {
-        serviceId,
         type,
         effectiveness,
         description,
@@ -60,12 +51,7 @@ export const createMainTreatment = async (req, res) => {
 // OBTENER TODOS LOS TRATAMIENTOS PRINCIPALES
 export const getAllMainTreatments = async (req, res) => {
   try {
-    const mainTreatments = await MainTreatment.findAll({
-      include: {
-        model: Service,
-        as: "service",
-      },
-    });
+    const mainTreatments = await MainTreatment.findAll();
 
     res.status(200).json({
       ok: true,
@@ -87,12 +73,7 @@ export const getMainTreatmentById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const mainTreatment = await MainTreatment.findByPk(id, {
-      include: {
-        model: Service,
-        as: "service",
-      },
-    });
+    const mainTreatment = await MainTreatment.findByPk(id);
 
     if (!mainTreatment) {
       return res.status(404).json({
@@ -123,8 +104,7 @@ export const updateMainTreatment = async (req, res) => {
 
   const transaction = await sequelize.transaction();
   try {
-    const { serviceId, type, effectiveness, description, recovery_time } =
-      req.body;
+    const { type, effectiveness, description, recovery_time } = req.body;
 
     const mainTreatment = await MainTreatment.findByPk(id);
 
@@ -139,7 +119,6 @@ export const updateMainTreatment = async (req, res) => {
     // Actualizar los campos
     await mainTreatment.update(
       {
-        serviceId,
         type,
         effectiveness,
         description,

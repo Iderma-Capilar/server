@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../index.js";
-import Service from "../servicios/services.js";
 
 const MainTreatment = sequelize.define(
   "MainTreatment",
@@ -9,14 +8,6 @@ const MainTreatment = sequelize.define(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
-    },
-    serviceId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: Service,
-        key: "id",
-      },
-      allowNull: false,
     },
     type: {
       type: DataTypes.STRING,
