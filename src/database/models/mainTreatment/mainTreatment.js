@@ -27,7 +27,7 @@ const MainTreatment = sequelize.define(
     },
   },
   {
-    tableName: "main_treatment",
+    tableName: "maintreatment",
   }
 );
 

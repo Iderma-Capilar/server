@@ -4,7 +4,6 @@ import QuestionAnswer from "../database/models/qa/qa.js";
 import Duration from "../database/models/duration/duration.js";
 import MainTreatment from "../database/models/mainTreatment/mainTreatment.js";
 import Recommendations from "../database/models/servicios/recommendations.js";
-import SecondaryTreatment from "../database/models/servicios/secondaryTreatment.js";
 import ServiceImage from "../database/models/servicios/serviceImage.js";
 import Service from "../database/models/servicios/services.js";
 import ServiceVideo from "../database/models/servicios/serviceVideo.js";
@@ -18,7 +17,6 @@ export const getAllServices = async (req, res) => {
         { model: ServiceVideo, as: "videos" },
         { model: QuestionAnswer, as: "qa" },
         { model: MainTreatment, as: "mainTreatments" },
-        { model: SecondaryTreatment, as: "secondaryTreatments" },
         { model: Benefit, as: "serviceBenefits" },
       ],
     });
@@ -49,7 +47,6 @@ export const getServiceById = async (req, res) => {
         { model: ServiceVideo, as: "videos" },
         { model: QuestionAnswer, as: "qa" },
         { model: MainTreatment, as: "mainTreatments" },
-        { model: SecondaryTreatment, as: "secondaryTreatments" },
         { model: Benefit, as: "serviceBenefits" },
       ],
     });
@@ -90,25 +87,16 @@ export const createService = async (req, res) => {
       videos = [],
       images = [],
       questions = [],
-      mainTreatments = [],
-      secondaryTreatments = [],
+      mainTreatmentId,
       benefits = [],
     } = req.body;
 
     // Validar campos obligatorios
-    if (!name || !description) {
+    if (!name || !description || !mainTreatmentId) {
       return res.status(400).json({
         ok: false,
         status: 400,
-        message: "Name and description are required.",
-      });
-    }
-
-    if (!mainTreatments.length) {
-      return res.status(400).json({
-        ok: false,
-        status: 400,
-        message: "At least one main treatment is required.",
+        message: "Name, description, and main treatment are required.",
       });
     }
 
@@ -118,39 +106,18 @@ export const createService = async (req, res) => {
         name,
         slogan,
         description,
+        mainTreatmentId,
       },
       { transaction }
     );
 
-    // Función para crear asociaciones
-    const createAssociations = async (
-      Model,
-      data,
-      serviceId,
-      extraFields = {}
-    ) => {
-      if (data.length) {
-        await Model.bulkCreate(
-          data.map((item) => ({ ...item, serviceId, ...extraFields })),
-          { transaction }
-        );
-      }
-    };
-
-    // Crear asociaciones: videos, imágenes, preguntas, tratamientos, beneficios
+    // Crear asociaciones: videos, imágenes, preguntas, beneficios
     await createAssociations(ServiceVideo, videos, newService.id);
     await createAssociations(ServiceImage, images, newService.id);
     await createAssociations(QuestionAnswer, questions, newService.id, {
       qaType: "service",
       productId: newService.id,
     });
-    await createAssociations(MainTreatment, mainTreatments, newService.id);
-    await createAssociations(
-      SecondaryTreatment,
-      secondaryTreatments,
-      newService.id,
-      {}
-    );
     await createAssociations(Benefit, benefits, newService.id, {
       benefit_type: "service",
       productId: newService.id,
@@ -170,14 +137,13 @@ export const createService = async (req, res) => {
     // Confirmar transacción
     await transaction.commit();
 
-    // Obtener servicio con todas las asociaciones, incluyendo Duration y Recommendations
+    // Obtener servicio con todas las asociaciones
     const serviceWithAssociations = await Service.findByPk(newService.id, {
       include: [
         { model: ServiceImage, as: "images" },
         { model: ServiceVideo, as: "videos" },
         { model: QuestionAnswer, as: "qa" },
         { model: MainTreatment, as: "mainTreatments" },
-        { model: SecondaryTreatment, as: "secondaryTreatments" },
         { model: Benefit, as: "serviceBenefits" },
         { model: Duration, as: "duration" },
         { model: Recommendations, as: "recommendations" },
@@ -205,22 +171,12 @@ export const createService = async (req, res) => {
 //--------------------------------------------------------------------------------------------
 
 export const updateService = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
-    const {
-      name,
-      slogan,
-      image,
-      description,
-      main_treatment,
-      secondary_treatment,
-      duration,
-      recommendations,
-      qa,
-    } = req.body;
+    const { name, slogan, description, mainTreatmentId } = req.body;
 
     const service = await Service.findByPk(id);
-
     if (!service) {
       return res.status(404).json({
         ok: false,
@@ -229,17 +185,18 @@ export const updateService = async (req, res) => {
       });
     }
 
-    await service.update({
-      name,
-      slogan,
-      image,
-      description,
-      main_treatment,
-      secondary_treatment,
-      duration,
-      recommendations,
-      qa,
-    });
+    // Actualizar el servicio con tratamiento principal
+    await service.update(
+      {
+        name,
+        slogan,
+        description,
+        mainTreatmentId,
+      },
+      { transaction }
+    );
+
+    await transaction.commit();
 
     res.status(200).json({
       ok: true,
@@ -247,6 +204,9 @@ export const updateService = async (req, res) => {
       data: service,
     });
   } catch (error) {
+    if (!transaction.finished) {
+      await transaction.rollback();
+    }
     res.status(500).json({
       ok: false,
       status: 500,

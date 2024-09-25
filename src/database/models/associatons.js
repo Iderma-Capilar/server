@@ -3,7 +3,6 @@ import QuestionAnswer from "./qa/qa.js";
 import Duration from "./duration/duration.js";
 import MainTreatment from "./mainTreatment/mainTreatment.js";
 import Recommendations from "./servicios/recommendations.js";
-import SecondaryTreatment from "./servicios/secondaryTreatment.js";
 import ServiceImage from "./servicios/serviceImage.js";
 import Service from "./servicios/services.js";
 import ServiceVideo from "./servicios/serviceVideo.js";
@@ -51,22 +50,9 @@ ServiceVideo.belongsTo(Service, {
   as: "service",
 });
 
-Service.hasMany(MainTreatment, {
-  foreignKey: "serviceId",
-  as: "mainTreatments",
-});
-MainTreatment.belongsTo(Service, {
-  foreignKey: "serviceId",
-  as: "service",
-});
-
-Service.hasMany(SecondaryTreatment, {
-  foreignKey: "serviceId",
-  as: "secondaryTreatments",
-});
-SecondaryTreatment.belongsTo(Service, {
-  foreignKey: "serviceId",
-  as: "service",
+Service.belongsTo(MainTreatment, {
+  foreignKey: "mainTreatmentId",
+  as: "mainTreatment",
 });
 
 // Nueva relación con Recommendations
@@ -106,15 +92,6 @@ MainTreatment.hasMany(Technology, {
   as: "technologies",
 });
 Technology.belongsTo(MainTreatment, {
-  foreignKey: "mainTreatmentId",
-  as: "mainTreatment",
-});
-
-MainTreatment.hasMany(SecondaryTreatment, {
-  foreignKey: "mainTreatmentId",
-  as: "secondaryTreatments",
-});
-SecondaryTreatment.belongsTo(MainTreatment, {
   foreignKey: "mainTreatmentId",
   as: "mainTreatment",
 });

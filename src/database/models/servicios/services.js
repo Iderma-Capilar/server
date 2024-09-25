@@ -19,6 +19,13 @@ const Service = sequelize.define(
     description: {
       type: DataTypes.TEXT,
     },
+    mainTreatmentId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: "maintreatment",
+        key: "id",
+      },
+    },
   },
   {
     tableName: "service",
