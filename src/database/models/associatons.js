@@ -3,9 +3,7 @@ import QuestionAnswer from "./qa/qa.js";
 import Duration from "./duration/duration.js";
 import MainTreatment from "./mainTreatment/mainTreatment.js";
 import Recommendations from "./servicios/recommendations.js";
-import ServiceImage from "./servicios/serviceImage.js";
 import Service from "./servicios/services.js";
-import ServiceVideo from "./servicios/serviceVideo.js";
 import Technology from "./technology/technology.js";
 import TechnologyImage from "./technology/technologyImages.js";
 import TechnologyVideo from "./technology/technologyVideos.js";
@@ -32,23 +30,6 @@ TechnologyVideo.belongsTo(Technology, {
 
 // SERVICE
 // --------------------------------------------------------------
-Service.hasMany(ServiceImage, {
-  foreignKey: "serviceId",
-  as: "images",
-});
-ServiceImage.belongsTo(Service, {
-  foreignKey: "serviceId",
-  as: "service",
-});
-
-Service.hasMany(ServiceVideo, {
-  foreignKey: "serviceId",
-  as: "videos",
-});
-ServiceVideo.belongsTo(Service, {
-  foreignKey: "serviceId",
-  as: "service",
-});
 
 Service.belongsTo(MainTreatment, {
   foreignKey: "mainTreatmentId",
@@ -74,7 +55,7 @@ Duration.belongsTo(Service, {
   foreignKey: "serviceId",
   as: "service",
 });
-
+Service.hasOne(Duration, { foreignKey: "serviceId", as: "duration" });
 // MAIN TREATMENT
 // --------------------------------------------------------------
 // Relación con Duration
@@ -110,8 +91,10 @@ Technology.belongsTo(MainTreatment, {
 // --------------------------------------------------------------
 Service.hasMany(QuestionAnswer, {
   foreignKey: "productId",
+  constraints: false,
   as: "qa",
 });
+
 QuestionAnswer.belongsTo(Service, {
   foreignKey: "productId",
   as: "service",
@@ -128,8 +111,10 @@ QuestionAnswer.belongsTo(Technology, {
 
 Service.hasMany(Benefit, {
   foreignKey: "productId",
+  constraints: false,
   as: "serviceBenefits",
 });
+
 Benefit.belongsTo(Service, {
   foreignKey: "productId",
   as: "service",

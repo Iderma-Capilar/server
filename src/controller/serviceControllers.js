@@ -1,22 +1,19 @@
-import { sequelize } from "../database/index.js";
+import { sequelize, createAssociations } from "../database/index.js";
 import Benefit from "../database/models/benefit/benefit.js";
 import QuestionAnswer from "../database/models/qa/qa.js";
 import Duration from "../database/models/duration/duration.js";
 import MainTreatment from "../database/models/mainTreatment/mainTreatment.js";
 import Recommendations from "../database/models/servicios/recommendations.js";
-import ServiceImage from "../database/models/servicios/serviceImage.js";
 import Service from "../database/models/servicios/services.js";
-import ServiceVideo from "../database/models/servicios/serviceVideo.js";
 
 //--------------------------------------------------------------------------------------------
 export const getAllServices = async (req, res) => {
   try {
     const services = await Service.findAll({
       include: [
-        { model: ServiceImage, as: "images" },
-        { model: ServiceVideo, as: "videos" },
         { model: QuestionAnswer, as: "qa" },
-        { model: MainTreatment, as: "mainTreatments" },
+        { model: MainTreatment, as: "mainTreatment" },
+        { model: MainTreatment, as: "associatedMainTreatments" },
         { model: Benefit, as: "serviceBenefits" },
       ],
     });
@@ -43,8 +40,6 @@ export const getServiceById = async (req, res) => {
     const { id } = req.params;
     const service = await Service.findByPk(id, {
       include: [
-        { model: ServiceImage, as: "images" },
-        { model: ServiceVideo, as: "videos" },
         { model: QuestionAnswer, as: "qa" },
         { model: MainTreatment, as: "mainTreatments" },
         { model: Benefit, as: "serviceBenefits" },
@@ -87,16 +82,17 @@ export const createService = async (req, res) => {
       videos = [],
       images = [],
       questions = [],
-      mainTreatmentId,
+      mainTreatmentId = null,
       benefits = [],
     } = req.body;
 
     // Validar campos obligatorios
-    if (!name || !description || !mainTreatmentId) {
+    if (!name || !description) {
+      await transaction.rollback();
       return res.status(400).json({
         ok: false,
         status: 400,
-        message: "Name, description, and main treatment are required.",
+        message: "Name and description are required.",
       });
     }
 
@@ -107,24 +103,35 @@ export const createService = async (req, res) => {
         slogan,
         description,
         mainTreatmentId,
+        videos,
+        images
       },
       { transaction }
     );
 
-    // Crear asociaciones: videos, imágenes, preguntas, beneficios
-    await createAssociations(ServiceVideo, videos, newService.id);
-    await createAssociations(ServiceImage, images, newService.id);
-    await createAssociations(QuestionAnswer, questions, newService.id, {
-      qaType: "service",
-      productId: newService.id,
-    });
-    await createAssociations(Benefit, benefits, newService.id, {
-      benefit_type: "service",
-      productId: newService.id,
-    });
+    await createAssociations(
+      QuestionAnswer,
+      questions,
+      newService.id,
+      {
+        qaType: "service",
+        productId: newService.id,
+      },
+      transaction // Asegúrate de pasar la transacción
+    );
+    await createAssociations(
+      Benefit,
+      benefits,
+      newService.id,
+      {
+        benefit_type: "service",
+        productId: newService.id,
+      },
+      transaction // Asegúrate de pasar la transacción
+    );
 
     // Crear la duración del servicio
-    if (duration) {
+    if (Object.keys(duration).length > 0) {
       await Duration.create(
         { ...duration, serviceId: newService.id },
         { transaction }
@@ -132,7 +139,12 @@ export const createService = async (req, res) => {
     }
 
     // Crear las recomendaciones asociadas
-    await createAssociations(Recommendations, recommendations, newService.id);
+    await createAssociations(
+      Recommendations,
+      recommendations,
+      newService.id,
+      transaction
+    );
 
     // Confirmar transacción
     await transaction.commit();
@@ -140,17 +152,15 @@ export const createService = async (req, res) => {
     // Obtener servicio con todas las asociaciones
     const serviceWithAssociations = await Service.findByPk(newService.id, {
       include: [
-        { model: ServiceImage, as: "images" },
-        { model: ServiceVideo, as: "videos" },
         { model: QuestionAnswer, as: "qa" },
-        { model: MainTreatment, as: "mainTreatments" },
+        { model: MainTreatment, as: "mainTreatment" },
         { model: Benefit, as: "serviceBenefits" },
         { model: Duration, as: "duration" },
         { model: Recommendations, as: "recommendations" },
       ],
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       ok: true,
       status: 201,
       data: serviceWithAssociations,
@@ -159,7 +169,8 @@ export const createService = async (req, res) => {
     if (!transaction.finished) {
       await transaction.rollback();
     }
-    res.status(500).json({
+    console.error("Error creating service:", error);
+    return res.status(500).json({
       ok: false,
       status: 500,
       message: "Error creating service",

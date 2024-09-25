@@ -26,6 +26,16 @@ const Service = sequelize.define(
         key: "id",
       },
     },
+    videos: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: [],
+    },
+    images: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: [],
+    },
   },
   {
     tableName: "service",

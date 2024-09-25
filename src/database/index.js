@@ -6,7 +6,7 @@ const { DATABASE_URL } = process.env;
 
 const sequelize = new Sequelize(DATABASE_URL, {
   dialect: "mysql",
-  logging: true,
+  logging: console.log,
 });
 
 const connectToDatabase = async () => {
@@ -21,4 +21,27 @@ const connectToDatabase = async () => {
   }
 };
 
-export { sequelize, connectToDatabase };
+const createAssociations = async (
+  Model,
+  items,
+  serviceId,
+  additionalData = {},
+  transaction
+) => {
+  if (!items || items.length === 0) return;
+
+  const dataToCreate = items.map((item) => ({
+    ...item,
+    serviceId,
+    ...additionalData,
+  }));
+
+  try {
+    await Model.bulkCreate(dataToCreate, { transaction });
+  } catch (error) {
+    console.error("Error creating associations:", error);
+    throw error;
+  }
+};
+
+export { sequelize, connectToDatabase, createAssociations };

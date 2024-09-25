@@ -1,5 +1,3 @@
-import ServiceImage from "../database/models/servicios/serviceImage.js";
-import ServiceVideo from "../database/models/servicios/serviceVideo.js";
 import Technology from "../database/models/technology/technology.js";
 
 // Crear una nueva tecnología
@@ -17,10 +15,7 @@ export const createTechnology = async (req, res) => {
 export const getAllTechnologies = async (req, res) => {
   try {
     const technologies = await Technology.findAll({
-      include: [
-        { model: ServiceImage, as: "images" },
-        { model: ServiceVideo, as: "videos" },
-      ],
+      include: [],
     });
     res.status(200).json(technologies);
   } catch (error) {
@@ -34,10 +29,7 @@ export const getTechnologyById = async (req, res) => {
   try {
     const { id } = req.params;
     const technology = await Technology.findByPk(id, {
-      include: [
-        { model: ServiceImage, as: "images" },
-        { model: ServiceVideo, as: "videos" },
-      ],
+      include: [],
     });
     if (technology) {
       res.status(200).json(technology);
@@ -60,10 +52,7 @@ export const updateTechnology = async (req, res) => {
 
     if (updated) {
       const updatedTechnology = await Technology.findByPk(id, {
-        include: [
-          { model: ServiceImage, as: "images" },
-          { model: ServiceVideo, as: "videos" },
-        ],
+        include: [],
       });
       res.status(200).json(updatedTechnology);
     } else {
