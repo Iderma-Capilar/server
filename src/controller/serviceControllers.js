@@ -2,7 +2,6 @@ import { sequelize, createAssociations } from "../database/index.js";
 import QuestionAnswer from "../database/models/qa/qa.js";
 import MainTreatment from "../database/models/mainTreatment/mainTreatment.js";
 import Service from "../database/models/servicios/services.js";
-import ComplementaryTreatment from "../database/models/complementaryTreatments/complementary.js";
 
 //--------------------------------------------------------------------------------------------
 export const getAllServices = async (req, res) => {
@@ -74,10 +73,13 @@ export const createService = async (req, res) => {
       name,
       slogan,
       description,
-      complementaryTreatments = [],
+      mainTreatmentId,
+      videos = [],
+      images = [],
       questions = [],
     } = req.body;
 
+    // Validación básica
     if (!name || !description) {
       await transaction.rollback();
       return res.status(400).json({
@@ -87,39 +89,38 @@ export const createService = async (req, res) => {
       });
     }
 
+    // Crear el nuevo servicio con todos los campos
     const newService = await Service.create(
       {
         name,
         slogan,
         description,
+        mainTreatmentId,
+        videos,
+        images,
       },
       { transaction }
     );
 
-    // Crear tratamientos complementarios asociados al servicio
-    await ComplementaryTreatment.bulkCreate(
-      complementaryTreatments.map((treatment) => ({
-        ...treatment,
-        serviceId: newService.id,
-      })),
-      { transaction }
-    );
-
     // Crear preguntas y respuestas asociadas
-    await createAssociations(
-      QuestionAnswer,
-      questions,
-      newService.id,
-      { qaType: "service" },
-      transaction
-    );
+    if (questions.length > 0) {
+      const qaRecords = questions.map((q) => ({
+        question: q.question,
+        answer: q.answer,
+        productId: newService.id,
+      }));
 
+      await QuestionAnswer.bulkCreate(qaRecords, { transaction });
+    }
+
+    // Confirmar transacción
     await transaction.commit();
 
+    // Obtener el servicio con las asociaciones
     const serviceWithAssociations = await Service.findByPk(newService.id, {
       include: [
-        { model: ComplementaryTreatment, as: "complementaryTreatments" },
         { model: QuestionAnswer, as: "qa" },
+        { model: MainTreatment, as: "mainTreatment" },
       ],
     });
 

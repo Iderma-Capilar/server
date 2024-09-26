@@ -25,6 +25,9 @@ const MainTreatment = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    post_treatment_care: {
+      type: DataTypes.STRING,
+    },
   },
   {
     tableName: "maintreatment",

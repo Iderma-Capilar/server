@@ -18,9 +18,16 @@ export const createMainTreatment = async (req, res) => {
       secondaryEffects = [],
       recommendations = [],
       duration = {},
+      postTreatmentCare,
     } = req.body;
 
-    if (!type || !effectiveness || !description || !recovery_time) {
+    if (
+      !type ||
+      !postTreatmentCare ||
+      !effectiveness ||
+      !description ||
+      !recovery_time
+    ) {
       return res.status(400).json({
         ok: false,
         status: 400,
@@ -34,6 +41,7 @@ export const createMainTreatment = async (req, res) => {
         effectiveness,
         description,
         recovery_time,
+        postTreatmentCare
       },
       { transaction }
     );

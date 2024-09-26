@@ -9,10 +9,6 @@ const QuestionAnswer = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    qaType: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     productId: {
       type: DataTypes.INTEGER,
       allowNull: false,
