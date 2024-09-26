@@ -1,13 +1,25 @@
 import { sequelize } from "../database/index.js";
+import Benefit from "../database/models/benefit/benefit.js";
+import Duration from "../database/models/duration/duration.js";
+import SecondaryEffects from "../database/models/duration/secondaryEffects.js";
 import MainTreatment from "../database/models/mainTreatment/mainTreatment.js";
+import Recommendations from "../database/models/servicios/recommendations.js";
 
 // CREAR TRATAMIENTO PRINCIPAL
 export const createMainTreatment = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { type, effectiveness, description, recovery_time } = req.body;
+    const {
+      type,
+      effectiveness,
+      description,
+      recovery_time,
+      benefits = [],
+      secondaryEffects = [],
+      recommendations = [],
+      duration = {},
+    } = req.body;
 
-    // Validar campos obligatorios
     if (!type || !effectiveness || !description || !recovery_time) {
       return res.status(400).json({
         ok: false,
@@ -16,7 +28,6 @@ export const createMainTreatment = async (req, res) => {
       });
     }
 
-    // Crear el nuevo tratamiento principal
     const newMainTreatment = await MainTreatment.create(
       {
         type,
@@ -27,7 +38,41 @@ export const createMainTreatment = async (req, res) => {
       { transaction }
     );
 
-    // Confirmar transacción
+    // Asignar beneficios
+    await Benefit.bulkCreate(
+      benefits.map((benefit) => ({
+        ...benefit,
+        mainTreatmentId: newMainTreatment.id,
+      })),
+      { transaction }
+    );
+
+    // Asignar efectos secundarios
+    await SecondaryEffects.bulkCreate(
+      secondaryEffects.map((effect) => ({
+        ...effect,
+        mainTreatmentId: newMainTreatment.id,
+      })),
+      { transaction }
+    );
+
+    // Asignar recomendaciones
+    await Recommendations.bulkCreate(
+      recommendations.map((rec) => ({
+        ...rec,
+        mainTreatmentId: newMainTreatment.id,
+      })),
+      { transaction }
+    );
+
+    // Asignar duración
+    if (Object.keys(duration).length > 0) {
+      await Duration.create(
+        { ...duration, mainTreatmentId: newMainTreatment.id },
+        { transaction }
+      );
+    }
+
     await transaction.commit();
 
     res.status(201).json({
@@ -51,7 +96,14 @@ export const createMainTreatment = async (req, res) => {
 // OBTENER TODOS LOS TRATAMIENTOS PRINCIPALES
 export const getAllMainTreatments = async (req, res) => {
   try {
-    const mainTreatments = await MainTreatment.findAll();
+    const mainTreatments = await MainTreatment.findAll({
+      include: [
+        { model: Benefit, as: "benefits" },
+        { model: SecondaryEffects, as: "secondaryEffects" },
+        { model: Recommendations, as: "recommendations" },
+        { model: Duration, as: "durations" },
+      ],
+    });
 
     res.status(200).json({
       ok: true,
@@ -70,10 +122,16 @@ export const getAllMainTreatments = async (req, res) => {
 
 // OBTENER UN TRATAMIENTO PRINCIPAL POR ID
 export const getMainTreatmentById = async (req, res) => {
-  const { id } = req.params;
-
   try {
-    const mainTreatment = await MainTreatment.findByPk(id);
+    const { id } = req.params;
+    const mainTreatment = await MainTreatment.findByPk(id, {
+      include: [
+        { model: Benefit, as: "benefits" },
+        { model: SecondaryEffects, as: "secondaryEffects" },
+        { model: Recommendations, as: "recommendations" },
+        { model: Duration, as: "durations" },
+      ],
+    });
 
     if (!mainTreatment) {
       return res.status(404).json({

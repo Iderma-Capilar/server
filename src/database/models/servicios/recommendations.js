@@ -13,10 +13,6 @@ const Recommendations = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    serviceId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
   },
   { tableName: "recommendations" }
 );

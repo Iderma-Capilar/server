@@ -7,6 +7,8 @@ import Service from "./servicios/services.js";
 import Technology from "./technology/technology.js";
 import TechnologyImage from "./technology/technologyImages.js";
 import TechnologyVideo from "./technology/technologyVideos.js";
+import SecondaryEffects from "./duration/secondaryEffects.js";
+import ComplementaryTreatment from "./complementaryTreatments/complementary.js";
 
 // TECHNOLOGY
 // --------------------------------------------------------------
@@ -30,107 +32,15 @@ TechnologyVideo.belongsTo(Technology, {
 
 // SERVICE
 // --------------------------------------------------------------
-
 Service.belongsTo(MainTreatment, {
   foreignKey: "mainTreatmentId",
   as: "mainTreatment",
 });
-
-// Nueva relación con Recommendations
-Service.hasMany(Recommendations, {
-  foreignKey: "serviceId",
-  as: "recommendations",
-});
-Recommendations.belongsTo(Service, {
-  foreignKey: "serviceId",
-  as: "service",
-});
-
-// Nueva relación con Duration
-Service.hasMany(Duration, {
-  foreignKey: "serviceId",
-  as: "durations",
-});
-Duration.belongsTo(Service, {
-  foreignKey: "serviceId",
-  as: "service",
-});
-Service.hasOne(Duration, { foreignKey: "serviceId", as: "duration" });
-// MAIN TREATMENT
-// --------------------------------------------------------------
-// Relación con Duration
-MainTreatment.hasMany(Duration, {
-  foreignKey: "mainTreatmentId",
-  as: "durations",
-});
-Duration.belongsTo(MainTreatment, {
-  foreignKey: "mainTreatmentId",
-  as: "mainTreatment",
-});
-
-MainTreatment.hasMany(Technology, {
-  foreignKey: "mainTreatmentId",
-  as: "technologies",
-});
-Technology.belongsTo(MainTreatment, {
-  foreignKey: "mainTreatmentId",
-  as: "mainTreatment",
-});
-
-// Relación con Testimonios
-// MainTreatment.hasMany(Testimonial, {
-//   foreignKey: "mainTreatmentId",
-//   as: "testimonials",
-// });
-// Testimonial.belongsTo(MainTreatment, {
-//   foreignKey: "mainTreatmentId",
-//   as: "mainTreatmentTestimonials",
-// });
-
-// COMPARTIDO
-// --------------------------------------------------------------
 Service.hasMany(QuestionAnswer, {
   foreignKey: "productId",
   constraints: false,
   as: "qa",
 });
-
-QuestionAnswer.belongsTo(Service, {
-  foreignKey: "productId",
-  as: "service",
-});
-
-Technology.hasMany(QuestionAnswer, {
-  foreignKey: "productId",
-  as: "qa",
-});
-QuestionAnswer.belongsTo(Technology, {
-  foreignKey: "productId",
-  as: "technology",
-});
-
-Service.hasMany(Benefit, {
-  foreignKey: "productId",
-  constraints: false,
-  as: "serviceBenefits",
-});
-
-Benefit.belongsTo(Service, {
-  foreignKey: "productId",
-  as: "service",
-});
-
-Technology.hasMany(Benefit, {
-  foreignKey: "productId",
-  as: "technologyBenefits",
-});
-Benefit.belongsTo(Technology, {
-  foreignKey: "productId",
-  as: "technology",
-});
-
-// MUCHOS A MUCHOS
-// --------------------------------------------------------------
 Service.belongsToMany(MainTreatment, {
   through: "ServiceMainTreatment",
   as: "associatedMainTreatments",
@@ -140,4 +50,64 @@ MainTreatment.belongsToMany(Service, {
   through: "ServiceMainTreatment",
   as: "services",
   foreignKey: "mainTreatmentId",
+});
+
+// COMPLEMENTARY TREATMENT
+// --------------------------------------------------------------
+ComplementaryTreatment.hasMany(MainTreatment, {
+  foreignKey: "complementaryTreatmentId",
+  as: "relatedMainTreatments",
+});
+ComplementaryTreatment.belongsTo(MainTreatment, {
+  foreignKey: "mainTreatmentId",
+  as: "mainComplementaryTreatment",
+});
+
+// MAIN TREATMENT
+// --------------------------------------------------------------
+MainTreatment.hasMany(Benefit, {
+  foreignKey: "mainTreatmentId",
+  as: "benefits",
+});
+MainTreatment.hasMany(Recommendations, {
+  foreignKey: "mainTreatmentId",
+  as: "recommendations",
+});
+MainTreatment.hasMany(Duration, {
+  foreignKey: "mainTreatmentId",
+  as: "durations",
+});
+MainTreatment.hasMany(Technology, {
+  foreignKey: "mainTreatmentId",
+  as: "technologies",
+});
+MainTreatment.hasMany(SecondaryEffects, {
+  foreignKey: "mainTreatmentId",
+  as: "secondaryEffects",
+});
+
+Benefit.belongsTo(MainTreatment, {
+  foreignKey: "mainTreatmentId",
+  as: "mainTreatment",
+});
+
+Duration.belongsTo(MainTreatment, {
+  foreignKey: "mainTreatmentId",
+  as: "mainTreatment",
+});
+Recommendations.belongsTo(MainTreatment, {
+  foreignKey: "mainTreatmentId",
+  as: "mainTreatment",
+});
+SecondaryEffects.belongsTo(MainTreatment, {
+  foreignKey: "mainTreatmentId",
+  as: "mainTreatment",
+});
+
+// QUESTION AND ANSWER
+// --------------------------------------------------------------
+QuestionAnswer.belongsTo(Service, { foreignKey: "productId", as: "service" });
+QuestionAnswer.belongsTo(Technology, {
+  foreignKey: "productId",
+  as: "technology",
 });

@@ -19,10 +19,6 @@ const Duration = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    serviceId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
   },
   {
     tableName: "duration",

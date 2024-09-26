@@ -1,10 +1,8 @@
 import { sequelize, createAssociations } from "../database/index.js";
-import Benefit from "../database/models/benefit/benefit.js";
 import QuestionAnswer from "../database/models/qa/qa.js";
-import Duration from "../database/models/duration/duration.js";
 import MainTreatment from "../database/models/mainTreatment/mainTreatment.js";
-import Recommendations from "../database/models/servicios/recommendations.js";
 import Service from "../database/models/servicios/services.js";
+import ComplementaryTreatment from "../database/models/complementaryTreatments/complementary.js";
 
 //--------------------------------------------------------------------------------------------
 export const getAllServices = async (req, res) => {
@@ -14,7 +12,6 @@ export const getAllServices = async (req, res) => {
         { model: QuestionAnswer, as: "qa" },
         { model: MainTreatment, as: "mainTreatment" },
         { model: MainTreatment, as: "associatedMainTreatments" },
-        { model: Benefit, as: "serviceBenefits" },
       ],
     });
 
@@ -41,8 +38,8 @@ export const getServiceById = async (req, res) => {
     const service = await Service.findByPk(id, {
       include: [
         { model: QuestionAnswer, as: "qa" },
-        { model: MainTreatment, as: "mainTreatments" },
-        { model: Benefit, as: "serviceBenefits" },
+        { model: MainTreatment, as: "mainTreatment" },
+        { model: MainTreatment, as: "associatedMainTreatments" },
       ],
     });
     if (!service) {
@@ -77,16 +74,10 @@ export const createService = async (req, res) => {
       name,
       slogan,
       description,
-      duration = {},
-      recommendations = [],
-      videos = [],
-      images = [],
+      complementaryTreatments = [],
       questions = [],
-      mainTreatmentId = null,
-      benefits = [],
     } = req.body;
 
-    // Validar campos obligatorios
     if (!name || !description) {
       await transaction.rollback();
       return res.status(400).json({
@@ -96,67 +87,39 @@ export const createService = async (req, res) => {
       });
     }
 
-    // Crear el nuevo servicio
     const newService = await Service.create(
       {
         name,
         slogan,
         description,
-        mainTreatmentId,
-        videos,
-        images
       },
       { transaction }
     );
 
+    // Crear tratamientos complementarios asociados al servicio
+    await ComplementaryTreatment.bulkCreate(
+      complementaryTreatments.map((treatment) => ({
+        ...treatment,
+        serviceId: newService.id,
+      })),
+      { transaction }
+    );
+
+    // Crear preguntas y respuestas asociadas
     await createAssociations(
       QuestionAnswer,
       questions,
       newService.id,
-      {
-        qaType: "service",
-        productId: newService.id,
-      },
-      transaction // Asegúrate de pasar la transacción
-    );
-    await createAssociations(
-      Benefit,
-      benefits,
-      newService.id,
-      {
-        benefit_type: "service",
-        productId: newService.id,
-      },
-      transaction // Asegúrate de pasar la transacción
-    );
-
-    // Crear la duración del servicio
-    if (Object.keys(duration).length > 0) {
-      await Duration.create(
-        { ...duration, serviceId: newService.id },
-        { transaction }
-      );
-    }
-
-    // Crear las recomendaciones asociadas
-    await createAssociations(
-      Recommendations,
-      recommendations,
-      newService.id,
+      { qaType: "service" },
       transaction
     );
 
-    // Confirmar transacción
     await transaction.commit();
 
-    // Obtener servicio con todas las asociaciones
     const serviceWithAssociations = await Service.findByPk(newService.id, {
       include: [
+        { model: ComplementaryTreatment, as: "complementaryTreatments" },
         { model: QuestionAnswer, as: "qa" },
-        { model: MainTreatment, as: "mainTreatment" },
-        { model: Benefit, as: "serviceBenefits" },
-        { model: Duration, as: "duration" },
-        { model: Recommendations, as: "recommendations" },
       ],
     });
 
@@ -169,8 +132,7 @@ export const createService = async (req, res) => {
     if (!transaction.finished) {
       await transaction.rollback();
     }
-    console.error("Error creating service:", error);
-    return res.status(500).json({
+    res.status(500).json({
       ok: false,
       status: 500,
       message: "Error creating service",
@@ -185,9 +147,12 @@ export const updateService = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
-    const { name, slogan, description, mainTreatmentId } = req.body;
+    const { name, slogan, description, mainTreatmentIds = [] } = req.body;
 
-    const service = await Service.findByPk(id);
+    const service = await Service.findByPk(id, {
+      include: [{ model: MainTreatment, as: "mainTreatments" }],
+    });
+
     if (!service) {
       return res.status(404).json({
         ok: false,
@@ -196,23 +161,42 @@ export const updateService = async (req, res) => {
       });
     }
 
-    // Actualizar el servicio con tratamiento principal
+    // Actualizar los campos del servicio
     await service.update(
       {
         name,
         slogan,
         description,
-        mainTreatmentId,
       },
       { transaction }
     );
 
+    // Actualizar los tratamientos asociados al servicio
+    if (mainTreatmentIds.length > 0) {
+      // Remover todos los tratamientos anteriores
+      await MainTreatment.destroy({
+        where: { serviceId: service.id },
+        transaction,
+      });
+
+      // Agregar nuevos tratamientos
+      const newTreatments = mainTreatmentIds.map((treatmentId) => ({
+        serviceId: service.id,
+        treatmentId,
+      }));
+      await MainTreatment.bulkCreate(newTreatments, { transaction });
+    }
+
     await transaction.commit();
+
+    const updatedService = await Service.findByPk(id, {
+      include: [{ model: MainTreatment, as: "mainTreatments" }],
+    });
 
     res.status(200).json({
       ok: true,
       status: 200,
-      data: service,
+      data: updatedService,
     });
   } catch (error) {
     if (!transaction.finished) {

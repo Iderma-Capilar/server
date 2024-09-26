@@ -9,14 +9,6 @@ const Benefit = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    benefit_type: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    productId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     description: {
       type: DataTypes.STRING,
       allowNull: false,
