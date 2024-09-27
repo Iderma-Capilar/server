@@ -7,7 +7,6 @@ import MainTreatment from "../database/models/mainTreatment/mainTreatment.js";
 import Recommendations from "../database/models/servicios/recommendations.js";
 
 // CREAR TRATAMIENTO PRINCIPAL
-// CREAR TRATAMIENTO PRINCIPAL
 export const createMainTreatment = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
