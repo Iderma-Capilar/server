@@ -9,9 +9,9 @@ export const getAllServices = async (req, res) => {
   try {
     const services = await Service.findAll({
       include: [
-        { model: QuestionAnswer, as: "qa" }, // Alias para preguntas y respuestas
-        { model: MainTreatment, as: "mainTreatment" }, // Tratamiento principal
-        { model: MainTreatment, as: "associatedMainTreatments" }, // Tratamientos asociados
+        { model: QuestionAnswer, as: "qa" },
+        { model: MainTreatment, as: "mainTreatment" },
+        { model: MainTreatment, as: "associatedMainTreatments" },
       ],
     });
 
@@ -37,9 +37,9 @@ export const getServiceById = async (req, res) => {
     const { id } = req.params;
     const service = await Service.findByPk(id, {
       include: [
-        { model: QuestionAnswer, as: "qa" }, // Alias para preguntas y respuestas
-        { model: MainTreatment, as: "mainTreatment" }, // Tratamiento principal
-        { model: MainTreatment, as: "associatedMainTreatments" }, // Tratamientos asociados
+        { model: QuestionAnswer, as: "qa" },
+        { model: MainTreatment, as: "mainTreatment" },
+        { model: MainTreatment, as: "associatedMainTreatments" },
       ],
     });
 
@@ -150,7 +150,8 @@ export const updateService = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
-    const { name, slogan, description, mainTreatmentIds = [] } = req.body;
+    const { name, slogan, description, mainTreatmentId, mainTreatmentIds } =
+      req.body;
 
     const service = await Service.findByPk(id, {
       include: [
@@ -167,12 +168,13 @@ export const updateService = async (req, res) => {
       });
     }
 
-    // Actualizar los campos del servicio
+    // Actualizar los campos del servicio, incluyendo mainTreatmentId
     await service.update(
       {
         name,
         slogan,
         description,
+        mainTreatmentId, // Asegúrate de incluir este campo
       },
       { transaction }
     );
@@ -183,13 +185,13 @@ export const updateService = async (req, res) => {
       {
         replacements: {
           serviceId: service.id,
-          mainTreatmentIds: mainTreatmentIds.length ? mainTreatmentIds : [null], // Para manejar el caso donde el array está vacío
+          mainTreatmentIds: mainTreatmentIds.length ? mainTreatmentIds : [null],
         },
         transaction,
       }
     );
 
-    // Agregar nuevos tratamientos
+    // Agregar nuevos tratamientos si es necesario
     if (mainTreatmentIds.length > 0) {
       const newTreatments = mainTreatmentIds.map((treatmentId) => ({
         serviceId: service.id,
