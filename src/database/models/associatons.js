@@ -5,31 +5,9 @@ import MainTreatment from "./mainTreatment/mainTreatment.js";
 import Recommendations from "./servicios/recommendations.js";
 import Service from "./servicios/services.js";
 import Technology from "./technology/technology.js";
-import TechnologyImage from "./technology/technologyImages.js";
-import TechnologyVideo from "./technology/technologyVideos.js";
 import SecondaryEffects from "./duration/secondaryEffects.js";
 import Complementary from "./complementaryTreatments/complementary.js";
 import ServiceMainTreatment from "./intermediate/serviceMainTreatment.js";
-
-// TECHNOLOGY
-// --------------------------------------------------------------
-Technology.hasMany(TechnologyImage, {
-  foreignKey: "technologyId",
-  as: "images",
-});
-TechnologyImage.belongsTo(Technology, {
-  foreignKey: "technologyId",
-  as: "technology",
-});
-
-Technology.hasMany(TechnologyVideo, {
-  foreignKey: "technologyId",
-  as: "videos",
-});
-TechnologyVideo.belongsTo(Technology, {
-  foreignKey: "technologyId",
-  as: "technology",
-});
 
 // SERVICE
 // --------------------------------------------------------------

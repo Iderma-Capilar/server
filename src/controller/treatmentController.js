@@ -7,6 +7,7 @@ import MainTreatment from "../database/models/mainTreatment/mainTreatment.js";
 import Recommendations from "../database/models/servicios/recommendations.js";
 
 // CREAR TRATAMIENTO PRINCIPAL
+// CREAR TRATAMIENTO PRINCIPAL
 export const createMainTreatment = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
@@ -15,11 +16,11 @@ export const createMainTreatment = async (req, res) => {
       effectiveness,
       description,
       recovery_time,
+      postTreatmentCare,
       benefits = [],
       secondaryEffects = [],
       recommendations = [],
       duration = {},
-      postTreatmentCare,
       complementary = [],
     } = req.body;
 
@@ -69,12 +70,15 @@ export const createMainTreatment = async (req, res) => {
     }
 
     // Agregar complementarios
-    await Complementary.bulkCreate(
-      complementary.map((treatment) => ({
-        ...treatment,
-        mainTreatmentId: newMainTreatment.id,
-      }))
-    );
+    if (complementary.length > 0) {
+      await Complementary.bulkCreate(
+        complementary.map((treatment) => ({
+          ...treatment,
+          mainTreatmentId: newMainTreatment.id,
+        })),
+        { transaction }
+      );
+    }
 
     // Asignar recomendaciones
     await Recommendations.bulkCreate(
@@ -93,12 +97,24 @@ export const createMainTreatment = async (req, res) => {
       );
     }
 
+    // Confirmar la transacción
     await transaction.commit();
+
+    // Obtener el tratamiento completo con todas sus relaciones
+    const createdTreatment = await MainTreatment.findByPk(newMainTreatment.id, {
+      include: [
+        { model: Benefit, as: "benefits" },
+        { model: SecondaryEffects, as: "secondaryEffects" },
+        { model: Recommendations, as: "recommendations" },
+        { model: Duration, as: "durations" },
+        { model: Complementary, as: "complementaryTreatments" },
+      ],
+    });
 
     res.status(201).json({
       ok: true,
       status: 201,
-      data: newMainTreatment,
+      data: createdTreatment,
     });
   } catch (error) {
     if (!transaction.finished) {
@@ -108,7 +124,7 @@ export const createMainTreatment = async (req, res) => {
       ok: false,
       status: 500,
       message: "Error creating main treatment",
-      error: error.message,
+      error: error,
     });
   }
 };
@@ -280,7 +296,7 @@ export const updateMainTreatment = async (req, res) => {
     res.status(200).json({
       ok: true,
       status: 200,
-      data: updatedFields, // Enviar solo los campos actualizados
+      data: updatedFields,
     });
   } catch (error) {
     if (!transaction.finished) {
