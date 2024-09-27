@@ -9,6 +9,7 @@ import TechnologyImage from "./technology/technologyImages.js";
 import TechnologyVideo from "./technology/technologyVideos.js";
 import SecondaryEffects from "./duration/secondaryEffects.js";
 import ComplementaryTreatment from "./complementaryTreatments/complementary.js";
+import ServiceMainTreatment from "./intermediate/serviceMainTreatment.js";
 
 // TECHNOLOGY
 // --------------------------------------------------------------
@@ -32,9 +33,9 @@ TechnologyVideo.belongsTo(Technology, {
 
 // SERVICE
 // --------------------------------------------------------------
-Service.belongsTo(MainTreatment, {
+Service.hasOne(MainTreatment, {
+  as: "mainTreatment", // Asociación de tratamiento principal
   foreignKey: "mainTreatmentId",
-  as: "mainTreatment",
 });
 Service.hasMany(QuestionAnswer, {
   foreignKey: "productId",
@@ -42,14 +43,16 @@ Service.hasMany(QuestionAnswer, {
   as: "qa",
 });
 Service.belongsToMany(MainTreatment, {
-  through: "ServiceMainTreatment",
-  as: "associatedMainTreatments",
+  as: "associatedMainTreatments", // Asociación de tratamientos relacionados
+  through: ServiceMainTreatment,
   foreignKey: "serviceId",
 });
+
 MainTreatment.belongsToMany(Service, {
-  through: "ServiceMainTreatment",
-  as: "services",
+  through: ServiceMainTreatment,
   foreignKey: "mainTreatmentId",
+  otherKey: "serviceId",
+  as: "services",
 });
 
 // COMPLEMENTARY TREATMENT

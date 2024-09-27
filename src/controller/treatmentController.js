@@ -41,7 +41,7 @@ export const createMainTreatment = async (req, res) => {
         effectiveness,
         description,
         recovery_time,
-        postTreatmentCare
+        post_treatment_care: postTreatmentCare,
       },
       { transaction }
     );
@@ -170,7 +170,13 @@ export const updateMainTreatment = async (req, res) => {
 
   const transaction = await sequelize.transaction();
   try {
-    const { type, effectiveness, description, recovery_time } = req.body;
+    const {
+      type,
+      effectiveness,
+      description,
+      recovery_time,
+      postTreatmentCare,
+    } = req.body;
 
     const mainTreatment = await MainTreatment.findByPk(id);
 
@@ -189,6 +195,7 @@ export const updateMainTreatment = async (req, res) => {
         effectiveness,
         description,
         recovery_time,
+        post_treatment_care: postTreatmentCare,
       },
       { transaction }
     );

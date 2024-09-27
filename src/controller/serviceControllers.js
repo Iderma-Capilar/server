@@ -1,16 +1,17 @@
-import { sequelize, createAssociations } from "../database/index.js";
+import { sequelize } from "../database/index.js";
 import QuestionAnswer from "../database/models/qa/qa.js";
 import MainTreatment from "../database/models/mainTreatment/mainTreatment.js";
 import Service from "../database/models/servicios/services.js";
+import ServiceMainTreatment from "../database/models/intermediate/serviceMainTreatment.js";
 
 //--------------------------------------------------------------------------------------------
 export const getAllServices = async (req, res) => {
   try {
     const services = await Service.findAll({
       include: [
-        { model: QuestionAnswer, as: "qa" },
-        { model: MainTreatment, as: "mainTreatment" },
-        { model: MainTreatment, as: "associatedMainTreatments" },
+        { model: QuestionAnswer, as: "qa" }, // Alias para preguntas y respuestas
+        { model: MainTreatment, as: "mainTreatment" }, // Tratamiento principal
+        { model: MainTreatment, as: "associatedMainTreatments" }, // Tratamientos asociados
       ],
     });
 
@@ -36,11 +37,12 @@ export const getServiceById = async (req, res) => {
     const { id } = req.params;
     const service = await Service.findByPk(id, {
       include: [
-        { model: QuestionAnswer, as: "qa" },
-        { model: MainTreatment, as: "mainTreatment" },
-        { model: MainTreatment, as: "associatedMainTreatments" },
+        { model: QuestionAnswer, as: "qa" }, // Alias para preguntas y respuestas
+        { model: MainTreatment, as: "mainTreatment" }, // Tratamiento principal
+        { model: MainTreatment, as: "associatedMainTreatments" }, // Tratamientos asociados
       ],
     });
+
     if (!service) {
       return res.status(404).json({
         ok: false,
@@ -151,7 +153,10 @@ export const updateService = async (req, res) => {
     const { name, slogan, description, mainTreatmentIds = [] } = req.body;
 
     const service = await Service.findByPk(id, {
-      include: [{ model: MainTreatment, as: "mainTreatments" }],
+      include: [
+        { model: MainTreatment, as: "mainTreatment" },
+        { model: MainTreatment, as: "associatedMainTreatments" },
+      ],
     });
 
     if (!service) {
@@ -172,26 +177,38 @@ export const updateService = async (req, res) => {
       { transaction }
     );
 
-    // Actualizar los tratamientos asociados al servicio
-    if (mainTreatmentIds.length > 0) {
-      // Remover todos los tratamientos anteriores
-      await MainTreatment.destroy({
-        where: { serviceId: service.id },
+    // Eliminar tratamientos no incluidos en la nueva lista
+    await sequelize.query(
+      "DELETE FROM ServiceMainTreatment WHERE serviceId = :serviceId AND mainTreatmentId NOT IN (:mainTreatmentIds)",
+      {
+        replacements: {
+          serviceId: service.id,
+          mainTreatmentIds: mainTreatmentIds.length ? mainTreatmentIds : [null], // Para manejar el caso donde el array está vacío
+        },
         transaction,
-      });
+      }
+    );
 
-      // Agregar nuevos tratamientos
+    // Agregar nuevos tratamientos
+    if (mainTreatmentIds.length > 0) {
       const newTreatments = mainTreatmentIds.map((treatmentId) => ({
         serviceId: service.id,
-        treatmentId,
+        mainTreatmentId: treatmentId,
       }));
-      await MainTreatment.bulkCreate(newTreatments, { transaction });
+
+      await ServiceMainTreatment.bulkCreate(newTreatments, {
+        ignoreDuplicates: true,
+        transaction,
+      });
     }
 
     await transaction.commit();
 
     const updatedService = await Service.findByPk(id, {
-      include: [{ model: MainTreatment, as: "mainTreatments" }],
+      include: [
+        { model: MainTreatment, as: "mainTreatment" },
+        { model: MainTreatment, as: "associatedMainTreatments" },
+      ],
     });
 
     res.status(200).json({
@@ -203,6 +220,7 @@ export const updateService = async (req, res) => {
     if (!transaction.finished) {
       await transaction.rollback();
     }
+    console.error(error); // Agregar un log para depuración
     res.status(500).json({
       ok: false,
       status: 500,
