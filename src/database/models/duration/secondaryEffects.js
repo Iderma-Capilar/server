@@ -9,13 +9,20 @@ const SecondaryEffects = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    title: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
     description: {
       type: DataTypes.TEXT,
-      allowNull: false,
+    },
+    mainTreatmentId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: "MainTreatment",
+        key: "id",
+      },
+      onDelete: "CASCADE",
     },
   },
   {

@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../index.js";
 
-const ComplementaryTreatment = sequelize.define(
-  "ComplementaryTreatment",
+const Complementary = sequelize.define(
+  "Complementary",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -16,10 +16,18 @@ const ComplementaryTreatment = sequelize.define(
     description: {
       type: DataTypes.TEXT,
     },
+    mainTreatmentId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: "MainTreatment",
+        key: "id",
+      },
+      onDelete: "CASCADE",
+    },
   },
   {
     tableName: "complementary_treatment",
   }
 );
 
-export default ComplementaryTreatment;
+export default Complementary;

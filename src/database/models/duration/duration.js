@@ -16,7 +16,7 @@ const Duration = sequelize.define(
       type: DataTypes.INTEGER,
     },
     sessions_interval: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: true,
     },
   },

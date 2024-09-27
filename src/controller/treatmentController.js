@@ -1,5 +1,6 @@
 import { sequelize } from "../database/index.js";
 import Benefit from "../database/models/benefit/benefit.js";
+import Complementary from "../database/models/complementaryTreatments/complementary.js";
 import Duration from "../database/models/duration/duration.js";
 import SecondaryEffects from "../database/models/duration/secondaryEffects.js";
 import MainTreatment from "../database/models/mainTreatment/mainTreatment.js";
@@ -19,6 +20,7 @@ export const createMainTreatment = async (req, res) => {
       recommendations = [],
       duration = {},
       postTreatmentCare,
+      complementary = [],
     } = req.body;
 
     if (
@@ -56,12 +58,22 @@ export const createMainTreatment = async (req, res) => {
     );
 
     // Asignar efectos secundarios
-    await SecondaryEffects.bulkCreate(
-      secondaryEffects.map((effect) => ({
-        ...effect,
+    if (secondaryEffects.length > 0) {
+      await SecondaryEffects.bulkCreate(
+        secondaryEffects.map((effect) => ({
+          ...effect,
+          mainTreatmentId: newMainTreatment.id,
+        })),
+        { transaction }
+      );
+    }
+
+    // Agregar complementarios
+    await Complementary.bulkCreate(
+      complementary.map((treatment) => ({
+        ...treatment,
         mainTreatmentId: newMainTreatment.id,
-      })),
-      { transaction }
+      }))
     );
 
     // Asignar recomendaciones
@@ -110,6 +122,7 @@ export const getAllMainTreatments = async (req, res) => {
         { model: SecondaryEffects, as: "secondaryEffects" },
         { model: Recommendations, as: "recommendations" },
         { model: Duration, as: "durations" },
+        { model: Complementary, as: "complementaryTreatments" },
       ],
     });
 
@@ -138,6 +151,7 @@ export const getMainTreatmentById = async (req, res) => {
         { model: SecondaryEffects, as: "secondaryEffects" },
         { model: Recommendations, as: "recommendations" },
         { model: Duration, as: "durations" },
+        { model: Complementary, as: "complementaryTreatments" },
       ],
     });
 
@@ -176,6 +190,8 @@ export const updateMainTreatment = async (req, res) => {
       description,
       recovery_time,
       postTreatmentCare,
+      secondaryEffects = [],
+      complementary = [],
     } = req.body;
 
     const mainTreatment = await MainTreatment.findByPk(id);
@@ -188,25 +204,83 @@ export const updateMainTreatment = async (req, res) => {
       });
     }
 
-    // Actualizar los campos
-    await mainTreatment.update(
-      {
-        type,
-        effectiveness,
-        description,
-        recovery_time,
-        post_treatment_care: postTreatmentCare,
-      },
-      { transaction }
-    );
+    // Crear un objeto para los campos actualizados
+    const updatedFields = {};
 
-    // Confirmar transacción
+    // Actualizar los campos del tratamiento principal y registrar cambios
+    if (type) {
+      updatedFields.type = type;
+      mainTreatment.type = type;
+    }
+    if (effectiveness) {
+      updatedFields.effectiveness = effectiveness;
+      mainTreatment.effectiveness = effectiveness;
+    }
+    if (description) {
+      updatedFields.description = description;
+      mainTreatment.description = description;
+    }
+    if (recovery_time) {
+      updatedFields.recovery_time = recovery_time;
+      mainTreatment.recovery_time = recovery_time;
+    }
+    if (postTreatmentCare) {
+      updatedFields.post_treatment_care = postTreatmentCare;
+      mainTreatment.post_treatment_care = postTreatmentCare;
+    }
+
+    // Guardar cambios en la base de datos
+    await mainTreatment.save({ transaction });
+
+    // Actualizar los efectos secundarios
+    if (secondaryEffects.length > 0) {
+      // Eliminar los efectos secundarios existentes
+      await SecondaryEffects.destroy({
+        where: { mainTreatmentId: id },
+        transaction,
+      });
+
+      // Crear los nuevos efectos secundarios
+      await SecondaryEffects.bulkCreate(
+        secondaryEffects.map((effect) => ({
+          ...effect,
+          mainTreatmentId: id,
+        })),
+        { transaction }
+      );
+
+      // Agregar efectos secundarios a los campos actualizados
+      updatedFields.secondaryEffects = secondaryEffects;
+    }
+
+    // Actualizar los tratamientos complementarios
+    if (complementary.length > 0) {
+      // Eliminar los tratamientos complementarios existentes
+      await Complementary.destroy({
+        where: { mainTreatmentId: id },
+        transaction,
+      });
+
+      // Crear los nuevos tratamientos complementarios
+      await Complementary.bulkCreate(
+        complementary.map((treatment) => ({
+          ...treatment,
+          mainTreatmentId: id,
+        })),
+        { transaction }
+      );
+
+      // Agregar tratamientos complementarios a los campos actualizados
+      updatedFields.complementary = complementary;
+    }
+
+    // Confirmar la transacción
     await transaction.commit();
 
     res.status(200).json({
       ok: true,
       status: 200,
-      data: mainTreatment,
+      data: updatedFields, // Enviar solo los campos actualizados
     });
   } catch (error) {
     if (!transaction.finished) {
