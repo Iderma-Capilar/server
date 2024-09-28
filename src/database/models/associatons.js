@@ -11,30 +11,32 @@ import ServiceMainTreatment from "./intermediate/serviceMainTreatment.js";
 
 // SERVICE
 // --------------------------------------------------------------
-Service.hasOne(MainTreatment, {
-  as: "mainTreatment",
-  foreignKey: "mainTreatmentId",
-});
+// Relación uno a muchos con preguntas y respuestas (QuestionAnswer)
 Service.hasMany(QuestionAnswer, {
   foreignKey: "productId",
   constraints: false,
   as: "qa",
 });
+QuestionAnswer.belongsTo(Service, { foreignKey: "productId", as: "service" });
+
+// Relación muchos a muchos con MainTreatment a través de tabla intermedia
 Service.belongsToMany(MainTreatment, {
   as: "associatedMainTreatments",
   through: ServiceMainTreatment,
   foreignKey: "serviceId",
+  otherKey: "mainTreatmentId", // Definir la otra clave
 });
 
 MainTreatment.belongsToMany(Service, {
+  as: "services",
   through: ServiceMainTreatment,
   foreignKey: "mainTreatmentId",
   otherKey: "serviceId",
-  as: "services",
 });
 
 // COMPLEMENTARY TREATMENT
 // --------------------------------------------------------------
+// Relación uno a muchos entre MainTreatment y Complementary
 MainTreatment.hasMany(Complementary, {
   foreignKey: "mainTreatmentId",
   as: "complementaryTreatments",
@@ -47,6 +49,7 @@ Complementary.belongsTo(MainTreatment, {
 
 // MAIN TREATMENT
 // --------------------------------------------------------------
+// Relación uno a muchos con otros modelos
 MainTreatment.hasMany(Benefit, {
   foreignKey: "mainTreatmentId",
   as: "benefits",
@@ -68,11 +71,11 @@ MainTreatment.hasMany(SecondaryEffects, {
   as: "secondaryEffects",
 });
 
+// Relación inversa entre MainTreatment y otros modelos
 Benefit.belongsTo(MainTreatment, {
   foreignKey: "mainTreatmentId",
   as: "mainTreatment",
 });
-
 Duration.belongsTo(MainTreatment, {
   foreignKey: "mainTreatmentId",
   as: "mainTreatment",
@@ -87,7 +90,7 @@ SecondaryEffects.belongsTo(MainTreatment, {
 
 // QUESTION AND ANSWER
 // --------------------------------------------------------------
-QuestionAnswer.belongsTo(Service, { foreignKey: "productId", as: "service" });
+// Relación con Technology para que una pregunta pueda estar asociada a un producto o una tecnología
 QuestionAnswer.belongsTo(Technology, {
   foreignKey: "productId",
   as: "technology",

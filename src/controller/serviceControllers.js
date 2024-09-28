@@ -3,6 +3,11 @@ import QuestionAnswer from "../database/models/qa/qa.js";
 import MainTreatment from "../database/models/mainTreatment/mainTreatment.js";
 import Service from "../database/models/servicios/services.js";
 import ServiceMainTreatment from "../database/models/intermediate/serviceMainTreatment.js";
+import Benefit from "../database/models/benefit/benefit.js";
+import SecondaryEffects from "../database/models/duration/secondaryEffects.js";
+import Recommendations from "../database/models/servicios/recommendations.js";
+import Duration from "../database/models/duration/duration.js";
+import Complementary from "../database/models/complementaryTreatments/complementary.js";
 
 //--------------------------------------------------------------------------------------------
 export const getAllServices = async (req, res) => {
@@ -10,8 +15,17 @@ export const getAllServices = async (req, res) => {
     const services = await Service.findAll({
       include: [
         { model: QuestionAnswer, as: "qa" },
-        { model: MainTreatment, as: "mainTreatment" },
-        { model: MainTreatment, as: "associatedMainTreatments" },
+        {
+          model: MainTreatment,
+          as: "associatedMainTreatments",
+          include: [
+            { model: Benefit, as: "benefits" },
+            { model: SecondaryEffects, as: "secondaryEffects" },
+            { model: Recommendations, as: "recommendations" },
+            { model: Duration, as: "durations" },
+            { model: Complementary, as: "complementaryTreatments" },
+          ],
+        },
       ],
     });
 
@@ -38,7 +52,6 @@ export const getServiceById = async (req, res) => {
     const service = await Service.findByPk(id, {
       include: [
         { model: QuestionAnswer, as: "qa" },
-        { model: MainTreatment, as: "mainTreatment" },
         { model: MainTreatment, as: "associatedMainTreatments" },
       ],
     });
@@ -75,7 +88,7 @@ export const createService = async (req, res) => {
       name,
       slogan,
       description,
-      mainTreatmentId,
+      mainTreatmentIds = [], // Array de IDs de tratamientos
       videos = [],
       images = [],
       questions = [],
@@ -97,7 +110,6 @@ export const createService = async (req, res) => {
         name,
         slogan,
         description,
-        mainTreatmentId,
         videos,
         images,
       },
@@ -115,6 +127,18 @@ export const createService = async (req, res) => {
       await QuestionAnswer.bulkCreate(qaRecords, { transaction });
     }
 
+    // Crear asociaciones con tratamientos principales (varios)
+    if (mainTreatmentIds.length > 0) {
+      const treatmentAssociations = mainTreatmentIds.map((treatmentId) => ({
+        serviceId: newService.id,
+        mainTreatmentId: treatmentId,
+      }));
+
+      await ServiceMainTreatment.bulkCreate(treatmentAssociations, {
+        transaction,
+      });
+    }
+
     // Confirmar transacción
     await transaction.commit();
 
@@ -122,7 +146,7 @@ export const createService = async (req, res) => {
     const serviceWithAssociations = await Service.findByPk(newService.id, {
       include: [
         { model: QuestionAnswer, as: "qa" },
-        { model: MainTreatment, as: "mainTreatment" },
+        { model: MainTreatment, as: "associatedMainTreatments" },
       ],
     });
 
@@ -150,70 +174,85 @@ export const updateService = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
-    const { name, slogan, description, mainTreatmentId, mainTreatmentIds } =
-      req.body;
+    const {
+      name,
+      slogan,
+      description,
+      mainTreatmentIds = [],
+      videos = [],
+      images = [],
+      questions = [],
+    } = req.body;
 
-    const service = await Service.findByPk(id, {
-      include: [
-        { model: MainTreatment, as: "mainTreatment" },
-        { model: MainTreatment, as: "associatedMainTreatments" },
-      ],
-    });
-
+    // Verificar que el servicio exista
+    const service = await Service.findByPk(id);
     if (!service) {
+      await transaction.rollback();
       return res.status(404).json({
         ok: false,
         status: 404,
-        message: "Service not found",
+        message: "Service not found.",
       });
     }
 
-    // Actualizar los campos del servicio, incluyendo mainTreatmentId
+    // Actualizar los datos básicos del servicio
     await service.update(
       {
         name,
         slogan,
         description,
-        mainTreatmentId, // Asegúrate de incluir este campo
+        videos,
+        images,
       },
       { transaction }
     );
 
-    // Eliminar tratamientos no incluidos en la nueva lista
-    await sequelize.query(
-      "DELETE FROM ServiceMainTreatment WHERE serviceId = :serviceId AND mainTreatmentId NOT IN (:mainTreatmentIds)",
-      {
-        replacements: {
-          serviceId: service.id,
-          mainTreatmentIds: mainTreatmentIds.length ? mainTreatmentIds : [null],
-        },
-        transaction,
-      }
-    );
+    // Actualizar preguntas y respuestas
+    if (questions.length > 0) {
+      // Primero, eliminamos las QA existentes
+      await QuestionAnswer.destroy({ where: { productId: id }, transaction });
 
-    // Agregar nuevos tratamientos si es necesario
+      // Luego, añadimos las nuevas QA
+      const qaRecords = questions.map((q) => ({
+        question: q.question,
+        answer: q.answer,
+        productId: id,
+      }));
+
+      await QuestionAnswer.bulkCreate(qaRecords, { transaction });
+    }
+
+    // Actualizar tratamientos principales asociados
     if (mainTreatmentIds.length > 0) {
-      const newTreatments = mainTreatmentIds.map((treatmentId) => ({
-        serviceId: service.id,
+      // Primero, eliminar asociaciones existentes en la tabla intermedia
+      await ServiceMainTreatment.destroy({
+        where: { serviceId: id },
+        transaction,
+      });
+
+      // Luego, crear nuevas asociaciones
+      const treatmentAssociations = mainTreatmentIds.map((treatmentId) => ({
+        serviceId: id,
         mainTreatmentId: treatmentId,
       }));
 
-      await ServiceMainTreatment.bulkCreate(newTreatments, {
-        ignoreDuplicates: true,
+      await ServiceMainTreatment.bulkCreate(treatmentAssociations, {
         transaction,
       });
     }
 
+    // Confirmar transacción
     await transaction.commit();
 
+    // Obtener el servicio actualizado con sus asociaciones
     const updatedService = await Service.findByPk(id, {
       include: [
-        { model: MainTreatment, as: "mainTreatment" },
+        { model: QuestionAnswer, as: "qa" },
         { model: MainTreatment, as: "associatedMainTreatments" },
       ],
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       ok: true,
       status: 200,
       data: updatedService,
@@ -222,7 +261,6 @@ export const updateService = async (req, res) => {
     if (!transaction.finished) {
       await transaction.rollback();
     }
-    console.error(error); // Agregar un log para depuración
     res.status(500).json({
       ok: false,
       status: 500,
