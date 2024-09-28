@@ -88,13 +88,12 @@ export const createService = async (req, res) => {
       name,
       slogan,
       description,
-      mainTreatmentIds = [], // Array de IDs de tratamientos
+      mainTreatmentIds = [],
       videos = [],
       images = [],
       questions = [],
     } = req.body;
 
-    // Validación básica
     if (!name || !description) {
       await transaction.rollback();
       return res.status(400).json({
@@ -104,7 +103,6 @@ export const createService = async (req, res) => {
       });
     }
 
-    // Crear el nuevo servicio con todos los campos
     const newService = await Service.create(
       {
         name,
@@ -196,29 +194,19 @@ export const updateService = async (req, res) => {
     }
 
     // Crear un objeto con los campos a actualizar
-    const updatedFields = {
-      name,
-      slogan,
-      description,
-    };
-
-    // Solo agregar videos e imágenes si están presentes en el cuerpo de la solicitud
-    if (videos !== undefined) {
-      updatedFields.videos = videos;
-    }
-    if (images !== undefined) {
-      updatedFields.images = images;
-    }
+    const updatedFields = {};
+    if (name) updatedFields.name = name;
+    if (slogan) updatedFields.slogan = slogan;
+    if (description) updatedFields.description = description;
+    if (videos !== undefined) updatedFields.videos = videos;
+    if (images !== undefined) updatedFields.images = images;
 
     // Actualizar los datos básicos del servicio
     await service.update(updatedFields, { transaction });
 
     // Actualizar preguntas y respuestas
     if (questions.length > 0) {
-      // Primero, eliminamos las QA existentes
       await QuestionAnswer.destroy({ where: { productId: id }, transaction });
-
-      // Luego, añadimos las nuevas QA
       const qaRecords = questions.map((q) => ({
         question: q.question,
         answer: q.answer,
@@ -230,13 +218,11 @@ export const updateService = async (req, res) => {
 
     // Actualizar tratamientos principales asociados
     if (mainTreatmentIds.length > 0) {
-      // Primero, eliminar asociaciones existentes en la tabla intermedia
       await ServiceMainTreatment.destroy({
         where: { serviceId: id },
         transaction,
       });
 
-      // Luego, crear nuevas asociaciones
       const treatmentAssociations = mainTreatmentIds.map((treatmentId) => ({
         serviceId: id,
         mainTreatmentId: treatmentId,
@@ -250,18 +236,29 @@ export const updateService = async (req, res) => {
     // Confirmar transacción
     await transaction.commit();
 
-    // Obtener el servicio actualizado con sus asociaciones
+    // Obtener los tratamientos asociados actualizados
     const updatedService = await Service.findByPk(id, {
       include: [
-        { model: QuestionAnswer, as: "qa" },
-        { model: MainTreatment, as: "associatedMainTreatments" },
+        {
+          model: MainTreatment,
+          as: "associatedMainTreatments",
+          required: false,
+        },
       ],
     });
+
+    // Construir la respuesta con los datos del servicio actualizado
+    const responseData = {
+      id: updatedService.id,
+      mainTreatmentIds:
+        mainTreatmentIds.length > 0 ? mainTreatmentIds : undefined,
+      associatedMainTreatments: updatedService.associatedMainTreatments,
+    };
 
     return res.status(200).json({
       ok: true,
       status: 200,
-      data: updatedService,
+      data: responseData,
     });
   } catch (error) {
     if (!transaction.finished) {
@@ -279,11 +276,11 @@ export const updateService = async (req, res) => {
 //--------------------------------------------------------------------------------------------
 
 export const deleteService = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
 
     const service = await Service.findByPk(id);
-
     if (!service) {
       return res.status(404).json({
         ok: false,
@@ -292,7 +289,19 @@ export const deleteService = async (req, res) => {
       });
     }
 
-    await service.destroy();
+    await QuestionAnswer.destroy({ where: { productId: id }, transaction });
+
+    // Si tienes otras tablas relacionadas, también deberías eliminarlas aquí
+    await ServiceMainTreatment.destroy({
+      where: { serviceId: id },
+      transaction,
+    });
+
+    // Luego, eliminar el servicio
+    await service.destroy({ transaction });
+
+    // Confirmar transacción
+    await transaction.commit();
 
     res.status(200).json({
       ok: true,
@@ -300,6 +309,9 @@ export const deleteService = async (req, res) => {
       message: "Service deleted successfully",
     });
   } catch (error) {
+    if (transaction.finished) {
+      await transaction.rollback();
+    }
     res.status(500).json({
       ok: false,
       status: 500,
