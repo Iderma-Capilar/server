@@ -179,8 +179,8 @@ export const updateService = async (req, res) => {
       slogan,
       description,
       mainTreatmentIds = [],
-      videos = [],
-      images = [],
+      videos,
+      images,
       questions = [],
     } = req.body;
 
@@ -195,17 +195,23 @@ export const updateService = async (req, res) => {
       });
     }
 
+    // Crear un objeto con los campos a actualizar
+    const updatedFields = {
+      name,
+      slogan,
+      description,
+    };
+
+    // Solo agregar videos e imágenes si están presentes en el cuerpo de la solicitud
+    if (videos !== undefined) {
+      updatedFields.videos = videos;
+    }
+    if (images !== undefined) {
+      updatedFields.images = images;
+    }
+
     // Actualizar los datos básicos del servicio
-    await service.update(
-      {
-        name,
-        slogan,
-        description,
-        videos,
-        images,
-      },
-      { transaction }
-    );
+    await service.update(updatedFields, { transaction });
 
     // Actualizar preguntas y respuestas
     if (questions.length > 0) {
