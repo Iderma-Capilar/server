@@ -10,7 +10,7 @@ import Duration from "../database/models/duration/duration.js";
 import Complementary from "../database/models/complementaryTreatments/complementary.js";
 
 //--------------------------------------------------------------------------------------------
-export const getAllServices = async (req, res) => {
+export const getAllServices = async (_req, res) => {
   try {
     const services = await Service.findAll({
       include: [
