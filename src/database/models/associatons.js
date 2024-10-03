@@ -24,7 +24,7 @@ Service.belongsToMany(MainTreatment, {
   as: "associatedMainTreatments",
   through: ServiceMainTreatment,
   foreignKey: "serviceId",
-  otherKey: "mainTreatmentId", // Definir la otra clave
+  otherKey: "mainTreatmentId",
 });
 
 MainTreatment.belongsToMany(Service, {
@@ -95,3 +95,14 @@ QuestionAnswer.belongsTo(Technology, {
   foreignKey: "productId",
   as: "technology",
 });
+
+await Service.sync();
+await MainTreatment.sync();
+await Complementary.sync();
+await ServiceMainTreatment.sync();
+await QuestionAnswer.sync();
+await Benefit.sync();
+await Duration.sync();
+await Recommendations.sync();
+await SecondaryEffects.sync();
+await Technology.sync();
