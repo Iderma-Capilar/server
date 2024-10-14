@@ -42,3 +42,19 @@ export const newUser = async (req, res) => {
     });
   }
 };
+
+export const getAllUsers = async (_req, res) => {
+  try {
+    const users = await NewsLetterRegister.findAll();
+    res.status(200).json({
+      message: "Usuarios obtenidos exitosamente",
+      users,
+    });
+  } catch (error) {
+    console.error("Error al  obtener los usuarios", error);
+    res.status(500).json({
+      message: "Error al obtener la lista de usuarios",
+      error: error.message,
+    });
+  }
+};

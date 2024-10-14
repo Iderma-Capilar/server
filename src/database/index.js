@@ -7,6 +7,12 @@ const { DATABASE_URL } = process.env;
 const sequelize = new Sequelize(DATABASE_URL, {
   dialect: "mysql",
   logging: console.log,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  },
 });
 
 const connectToDatabase = async () => {
@@ -14,7 +20,7 @@ const connectToDatabase = async () => {
     await sequelize.authenticate();
     console.log("Connected to database");
     // await sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
-    await sequelize.sync({ force: true });
+    await sequelize.sync({ alert: true });
     console.log("All models were synchronized successfully.");
   } catch (err) {
     console.error("Error connecting to the database:", err);
