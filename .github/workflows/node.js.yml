@@ -2,26 +2,38 @@ name: Copy to Iderma Docker
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout server repository
-      uses: actions/checkout@v2
+      - name: Checkout server repository
+        uses: actions/checkout@v2
+        with:
+          repository: IdermaCapilar1/server
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: server
 
-    steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+      - name: Clone Iderma Docker repository
+        run: |
+          git clone https://github.com/IdermaCapilar1/iderma-docker.git
+          cd iderma-docker
+          git config user.name "tu_usuario"
+          git config user.email "tu_email"
+
+      - name: Copy files
+        run: |
+          cp -R server/* iderma-docker/backend/
+
+      - name: Commit and push changes
+        run: |
+          cd iderma-docker
+          git add .
+          git commit -m "Actualización desde el repositorio server"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
