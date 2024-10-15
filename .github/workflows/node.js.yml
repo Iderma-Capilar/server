@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout server repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: IdermaCapilar1/server
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PMA_TOKEN }}
           path: server
 
       - name: Clone Iderma Docker repository
@@ -36,4 +36,4 @@ jobs:
           git commit -m "Actualización desde el repositorio server"
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PMA_TOKEN }}
