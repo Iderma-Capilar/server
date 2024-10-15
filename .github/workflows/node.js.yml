@@ -22,8 +22,8 @@ jobs:
         run: |
           git clone https://github.com/IdermaCapilar1/iderma-docker.git
           cd iderma-docker
-          git config user.name "tu_usuario"
-          git config user.email "tu_email"
+          git config user.name "IdermaCapilar1"
+          git config user.email "idermadesarrolladorweb2@gmail.com"
 
       - name: Copy files
         run: |
