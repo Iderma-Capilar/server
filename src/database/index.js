@@ -19,7 +19,6 @@ const connectToDatabase = async () => {
   try {
     await sequelize.authenticate();
     console.log("Connected to database");
-    // await sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
     await sequelize.sync({ alert: true });
     console.log("All models were synchronized successfully.");
   } catch (err) {
@@ -52,3 +51,4 @@ const createAssociations = async (
 };
 
 export { sequelize, connectToDatabase, createAssociations };
+//prueba 1 con workflow
