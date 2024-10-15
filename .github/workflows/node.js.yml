@@ -9,6 +9,10 @@ jobs:
   update-server:
     runs-on: self-hosted
     steps:
+      - name: Marcar directorio como seguro
+        run: |
+          git config --global --add safe.directory /root/server
+      
       - name: Actualizar repositorio server
         run: |
           cd /root/server
