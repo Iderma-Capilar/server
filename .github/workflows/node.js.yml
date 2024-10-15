@@ -20,4 +20,4 @@ jobs:
 
       - name: Copiar archivos actualizados
         run: |
-          rsync -av --exclude='.git/' --exclude='.github/' /root/server/ /root/iderma-docker/backend/
+          rsync -av /root/server/ /root/iderma-docker/backend/
