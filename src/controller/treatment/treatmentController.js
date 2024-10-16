@@ -1,10 +1,10 @@
-import { sequelize } from "../database/index.js";
-import Benefit from "../database/models/benefit/benefit.js";
-import Complementary from "../database/models/complementaryTreatments/complementary.js";
-import Duration from "../database/models/duration/duration.js";
-import SecondaryEffects from "../database/models/duration/secondaryEffects.js";
-import MainTreatment from "../database/models/mainTreatment/mainTreatment.js";
-import Recommendations from "../database/models/servicios/recommendations.js";
+import { sequelize } from "../../database/index.js";
+import Benefit from "../../database/models/benefit/benefit.js";
+import Complementary from "../../database/models/complementaryTreatments/complementary.js";
+import Duration from "../../database/models/duration/duration.js";
+import SecondaryEffects from "../../database/models/duration/secondaryEffects.js";
+import MainTreatment from "../../database/models/mainTreatment/mainTreatment.js";
+import Recommendations from "../../database/models/servicios/recommendations.js";
 
 // CREAR TRATAMIENTO PRINCIPAL
 export const createMainTreatment = async (req, res) => {

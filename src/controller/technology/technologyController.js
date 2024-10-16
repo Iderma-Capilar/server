@@ -1,4 +1,4 @@
-import Technology from "../database/models/technology/technology.js";
+import Technology from "../../database/models/technology/technology.js";
 
 // Crear una nueva tecnología
 export const createTechnology = async (req, res) => {
