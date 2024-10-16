@@ -51,4 +51,3 @@ const createAssociations = async (
 };
 
 export { sequelize, connectToDatabase, createAssociations };
-//prueba 1 con workflow
