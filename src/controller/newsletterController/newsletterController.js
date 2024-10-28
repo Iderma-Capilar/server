@@ -29,7 +29,7 @@ export const newUser = async (req, res) => {
     await transacción.commit();
 
     res.status(201).json({
-      message: "Usuario creado y registrado en MailChimp exitosamente",
+      message: "Usuario creado y registrado en mailchimp",
       user: user,
     });
   } catch (error) {
