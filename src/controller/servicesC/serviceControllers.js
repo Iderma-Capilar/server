@@ -1,13 +1,13 @@
-import { sequelize } from "../database/index.js";
-import QuestionAnswer from "../database/models/qa/qa.js";
-import MainTreatment from "../database/models/mainTreatment/mainTreatment.js";
-import Service from "../database/models/servicios/services.js";
-import ServiceMainTreatment from "../database/models/intermediate/serviceMainTreatment.js";
-import Benefit from "../database/models/benefit/benefit.js";
-import SecondaryEffects from "../database/models/duration/secondaryEffects.js";
-import Recommendations from "../database/models/servicios/recommendations.js";
-import Duration from "../database/models/duration/duration.js";
-import Complementary from "../database/models/complementaryTreatments/complementary.js";
+import { sequelize } from "../../database/index.js";
+import QuestionAnswer from "../../database/models/qa/qa.js";
+import MainTreatment from "../../database/models/mainTreatment/mainTreatment.js";
+import Service from "../../database/models/servicios/services.js";
+import ServiceMainTreatment from "../../database/models/intermediate/serviceMainTreatment.js";
+import Benefit from "../../database/models/benefit/benefit.js";
+import SecondaryEffects from "../../database/models/duration/secondaryEffects.js";
+import Recommendations from "../../database/models/servicios/recommendations.js";
+import Duration from "../../database/models/duration/duration.js";
+import Complementary from "../../database/models/complementaryTreatments/complementary.js";
 
 //--------------------------------------------------------------------------------------------
 export const getAllServices = async (_req, res) => {

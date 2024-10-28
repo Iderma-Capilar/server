@@ -5,7 +5,7 @@ import {
   getAllMainTreatments,
   getMainTreatmentById,
   updateMainTreatment,
-} from "../controller/treatmentController.js";
+} from "../controller/treatment/treatmentController.js";
 
 const router = Router();
 

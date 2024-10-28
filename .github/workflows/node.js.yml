@@ -1,39 +1,23 @@
-name: Copy to Iderma Docker
+name: Actualizar archivos en VPS
 
 on:
   push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
+  update-server:
+    runs-on: self-hosted
     steps:
-      - name: Checkout server repository
-        uses: actions/checkout@v4
-        with:
-          repository: IdermaCapilar1/server
-          token: ${{ secrets.PMA_TOKEN }}
-          path: server
-
-      - name: Clone Iderma Docker repository
+      - name: Marcar directorio como seguro
         run: |
-          git clone https://github.com/IdermaCapilar1/iderma-docker.git
-          cd iderma-docker
-          git config user.name "tu_usuario"
-          git config user.email "tu_email"
-
-      - name: Copy files
+          git config --global --add safe.directory /root/server
+      
+      - name: Actualizar repositorio server
         run: |
-          cp -R server/* iderma-docker/backend/
+          cd /root/server
+          git pull origin main
 
-      - name: Commit and push changes
+      - name: Copiar archivos actualizados
         run: |
-          cd iderma-docker
-          git add .
-          git commit -m "Actualización desde el repositorio server"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.PMA_TOKEN }}
+          rsync -av --exclude='.git' /root/server/ /root/iderma-docker/backend/

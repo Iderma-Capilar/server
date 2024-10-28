@@ -5,7 +5,7 @@ import {
   getAllTechnologies,
   getTechnologyById,
   updateTechnology,
-} from "../controller/technologyController.js";
+} from "../controller/technology/technologyController.js";
 
 const router = Router();
 
