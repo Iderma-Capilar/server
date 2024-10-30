@@ -8,6 +8,7 @@ import SecondaryEffects from "../../database/models/duration/secondaryEffects.js
 import Recommendations from "../../database/models/servicios/recommendations.js";
 import Duration from "../../database/models/duration/duration.js";
 import Complementary from "../../database/models/complementaryTreatments/complementary.js";
+import Problem from "../../database/models/problem/problem.js";
 
 //--------------------------------------------------------------------------------------------
 export const getAllServices = async (_req, res) => {
@@ -15,6 +16,8 @@ export const getAllServices = async (_req, res) => {
     const services = await Service.findAll({
       include: [
         { model: QuestionAnswer, as: "qa" },
+        { model: Problem, as: "problems" },
+        { model: Benefit, as: "benefits" },
         {
           model: MainTreatment,
           as: "associatedMainTreatments",
@@ -88,10 +91,16 @@ export const createService = async (req, res) => {
       name,
       slogan,
       description,
+      technology = {},
+      problem = [],
+      // duration = {},
+      patient_profile,
+      questions = [],
+      benefits = [],
       mainTreatmentIds = [],
       videos = [],
       images = [],
-      questions = [],
+      cta,
     } = req.body;
 
     if (!name || !description) {
@@ -103,13 +112,17 @@ export const createService = async (req, res) => {
       });
     }
 
+    // Crear el servicio
     const newService = await Service.create(
       {
         name,
         slogan,
         description,
+        technology,
+        patient_profile,
         videos,
         images,
+        cta,
       },
       { transaction }
     );
@@ -119,11 +132,40 @@ export const createService = async (req, res) => {
       const qaRecords = questions.map((q) => ({
         question: q.question,
         answer: q.answer,
-        productId: newService.id,
+        parentId: newService.id,
+        parentType: "service",
       }));
-
       await QuestionAnswer.bulkCreate(qaRecords, { transaction });
     }
+
+    // Asignar beneficios
+    if (benefits.length > 0) {
+      await Benefit.bulkCreate(
+        benefits.map((benefit) => ({
+          ...benefit,
+          serviceId: newService.id,
+        })),
+        { transaction }
+      );
+    }
+
+    // Crear problemas y soluciones asociadas
+    if (problem.length > 0) {
+      const problemRecords = problem.map((p) => ({
+        description: p.description,
+        solution: p.solution,
+        serviceId: newService.id,
+      }));
+      await Problem.bulkCreate(problemRecords, { transaction });
+    }
+
+    // Asignar duración
+    // if (Object.keys(duration).length > 0) {
+    //   await Duration.create(
+    //     { ...duration, serviceId: newService.id },
+    //     { transaction }
+    //   );
+    // }
 
     // Crear asociaciones con tratamientos principales (varios)
     if (mainTreatmentIds.length > 0) {
@@ -131,7 +173,6 @@ export const createService = async (req, res) => {
         serviceId: newService.id,
         mainTreatmentId: treatmentId,
       }));
-
       await ServiceMainTreatment.bulkCreate(treatmentAssociations, {
         transaction,
       });
@@ -140,10 +181,13 @@ export const createService = async (req, res) => {
     // Confirmar transacción
     await transaction.commit();
 
-    // Obtener el servicio con las asociaciones
+    // Obtener el servicio con todas las asociaciones
     const serviceWithAssociations = await Service.findByPk(newService.id, {
       include: [
         { model: QuestionAnswer, as: "qa" },
+        { model: Benefit, as: "benefits" },
+        { model: Problem, as: "problems" },
+        { model: Duration, as: "duration" },
         { model: MainTreatment, as: "associatedMainTreatments" },
       ],
     });
@@ -154,9 +198,11 @@ export const createService = async (req, res) => {
       data: serviceWithAssociations,
     });
   } catch (error) {
-    if (!transaction.finished) {
+    if (transaction.finished !== "commit") {
       await transaction.rollback();
     }
+    console.error("Error creating service:", error);
+
     res.status(500).json({
       ok: false,
       status: 500,

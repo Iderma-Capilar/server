@@ -19,6 +19,16 @@ const Service = sequelize.define(
     description: {
       type: DataTypes.TEXT,
     },
+    technology: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+    patient_profile: {
+      type: DataTypes.TEXT,
+    },
+    cta: {
+      type: DataTypes.STRING,
+    },
     videos: {
       type: DataTypes.JSON,
       allowNull: true,

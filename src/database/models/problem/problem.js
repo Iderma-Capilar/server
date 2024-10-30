@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../index.js";
 
-const Benefit = sequelize.define(
-  "Benefit",
+const Problem = sequelize.define(
+  "Problem",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -13,14 +13,13 @@ const Benefit = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    title: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+    solution: {
+      type: DataTypes.JSON,
+    }
   },
   {
-    tableName: "benefit",
+    tableName: "problems",
   }
 );
 
-export default Benefit;
+export default Problem;

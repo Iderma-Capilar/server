@@ -8,16 +8,44 @@ import Technology from "./technology/technology.js";
 import SecondaryEffects from "./duration/secondaryEffects.js";
 import Complementary from "./complementaryTreatments/complementary.js";
 import ServiceMainTreatment from "./intermediate/serviceMainTreatment.js";
+import Problem from "./problem/problem.js";
 
-// SERVICE
-// --------------------------------------------------------------
-// Relación uno a muchos con preguntas y respuestas (QuestionAnswer)
-Service.hasMany(QuestionAnswer, {
-  foreignKey: "productId",
+// Relaciones polimórficas para QuestionAnswer
+const questionAnswerOptions = {
+  foreignKey: "parentId",
   constraints: false,
   as: "qa",
+};
+
+// Relación polimórfica de Service con QuestionAnswer
+Service.hasMany(QuestionAnswer, {
+  ...questionAnswerOptions,
+  scope: { parentType: "service" },
 });
-QuestionAnswer.belongsTo(Service, { foreignKey: "productId", as: "service" });
+QuestionAnswer.belongsTo(Service, {
+  foreignKey: "parentId",
+  constraints: false,
+});
+
+// Relación polimórfica de Technology con QuestionAnswer
+Technology.hasMany(QuestionAnswer, {
+  ...questionAnswerOptions,
+  scope: { parentType: "technology" },
+});
+QuestionAnswer.belongsTo(Technology, {
+  foreignKey: "parentId",
+  constraints: false,
+});
+
+// Relación polimórfica de MainTreatment con QuestionAnswer
+MainTreatment.hasMany(QuestionAnswer, {
+  ...questionAnswerOptions,
+  scope: { parentType: "mainTreatment" },
+});
+QuestionAnswer.belongsTo(MainTreatment, {
+  foreignKey: "parentId",
+  constraints: false,
+});
 
 // Relación muchos a muchos con MainTreatment a través de tabla intermedia
 Service.belongsToMany(MainTreatment, {
@@ -26,7 +54,6 @@ Service.belongsToMany(MainTreatment, {
   foreignKey: "serviceId",
   otherKey: "mainTreatmentId",
 });
-
 MainTreatment.belongsToMany(Service, {
   as: "services",
   through: ServiceMainTreatment,
@@ -34,22 +61,27 @@ MainTreatment.belongsToMany(Service, {
   otherKey: "serviceId",
 });
 
-// COMPLEMENTARY TREATMENT
-// --------------------------------------------------------------
-// Relación uno a muchos entre MainTreatment y Complementary
+// Relación uno a muchos entre Service y Benefit
+Service.hasMany(Benefit, {
+  foreignKey: "serviceId",
+  as: "benefits",
+});
+Benefit.belongsTo(Service, {
+  foreignKey: "serviceId",
+  as: "service",
+});
+
+// Relación entre MainTreatment y Complementary
 MainTreatment.hasMany(Complementary, {
   foreignKey: "mainTreatmentId",
   as: "complementaryTreatments",
 });
-
 Complementary.belongsTo(MainTreatment, {
   foreignKey: "mainTreatmentId",
   as: "mainTreatment",
 });
 
-// MAIN TREATMENT
-// --------------------------------------------------------------
-// Relación uno a muchos con otros modelos
+// Relaciones adicionales para MainTreatment
 MainTreatment.hasMany(Benefit, {
   foreignKey: "mainTreatmentId",
   as: "benefits",
@@ -71,7 +103,6 @@ MainTreatment.hasMany(SecondaryEffects, {
   as: "secondaryEffects",
 });
 
-// Relación inversa entre MainTreatment y otros modelos
 Benefit.belongsTo(MainTreatment, {
   foreignKey: "mainTreatmentId",
   as: "mainTreatment",
@@ -84,18 +115,29 @@ Recommendations.belongsTo(MainTreatment, {
   foreignKey: "mainTreatmentId",
   as: "mainTreatment",
 });
-SecondaryEffects.belongsTo(MainTreatment, {
-  foreignKey: "mainTreatmentId",
+SecondaryEffects.belongsTo(MainTreatment, { foreignKey: "mainTreatmentId" });
+
+// Relación uno a muchos entre Service y Problem
+Service.hasMany(Problem, {
+  foreignKey: "serviceId",
+  as: "problems",
+});
+Problem.belongsTo(Service, {
+  foreignKey: "serviceId",
+  as: "service",
 });
 
-// QUESTION AND ANSWER
-// --------------------------------------------------------------
-// Relación con Technology para que una pregunta pueda estar asociada a un producto o una tecnología
-QuestionAnswer.belongsTo(Technology, {
-  foreignKey: "productId",
-  as: "technology",
+// Relación uno a muchos entre Service y Duration
+Service.hasMany(Duration, {
+  foreignKey: "serviceId",
+  as: "duration",
+});
+Duration.belongsTo(Service, {
+  foreignKey: "serviceId",
+  as: "service",
 });
 
+// Sincronización de tablas
 await Service.sync();
 await MainTreatment.sync();
 await Complementary.sync();
@@ -106,3 +148,5 @@ await Duration.sync();
 await Recommendations.sync();
 await SecondaryEffects.sync();
 await Technology.sync();
+await Problem.sync();
+await Duration.sync();
