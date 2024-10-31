@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "Complementary",
+      freezeTableName: true,
     }
   );
   return Complementary;

@@ -1,10 +1,10 @@
 const { sequelize } = require("../../utils/index.js");
 
 const {
-  Questionsanswer,
+  QuestionsAnswer,
   Service,
-  Servicemaintreatment,
-  Secondaryeffects,
+  ServiceMainTreatment,
+  SecondaryEffects,
   Recommendations,
   Duration,
   Complementary,
@@ -18,18 +18,18 @@ const getAllServices = async (_req, res) => {
   try {
     const services = await Service.findAll({
       include: [
-        { model: Questionsanswer, as: "serviceQA" },
+        { model: QuestionsAnswer, as: "serviceQA" },
         { model: Problem, as: "problems" },
-        { model: Benefit, as: "benefits" },
+        // { model: Benefit, as: "benefits" },
         {
           model: MainTreatments,
           as: "associatedMainTreatments",
           include: [
             { model: Benefit, as: "benefits" },
-            { model: Secondaryeffects, as: "secondaryEffects" },
+            { model: SecondaryEffects, as: "secondaryEffects" },
             { model: Recommendations, as: "recommendations" },
             { model: Duration, as: "durations" },
-            { model: Complementary, as: "complementaryTreatments" },
+            { model: Complementary, as: "complementary" },
           ],
         },
       ],
@@ -57,7 +57,7 @@ const getServiceById = async (req, res) => {
     const { id } = req.params;
     const service = await Service.findByPk(id, {
       include: [
-        { model: Questionsanswer, as: "serviceQA" },
+        { model: QuestionsAnswer, as: "serviceQA" },
         { model: MainTreatments, as: "associatedMainTreatments" },
       ],
     });
@@ -138,7 +138,7 @@ const createService = async (req, res) => {
         parentId: newService.id,
         parentType: "service",
       }));
-      await Questionsanswer.bulkCreate(qaRecords, { transaction });
+      await QuestionsAnswer.bulkCreate(qaRecords, { transaction });
     }
 
     // Asignar beneficios
@@ -176,7 +176,7 @@ const createService = async (req, res) => {
         serviceId: newService.id,
         mainTreatmentId: treatmentId,
       }));
-      await Servicemaintreatment.bulkCreate(treatmentAssociations, {
+      await ServiceMainTreatment.bulkCreate(treatmentAssociations, {
         transaction,
       });
     }
@@ -187,7 +187,7 @@ const createService = async (req, res) => {
     // Obtener el servicio con todas las asociaciones
     const serviceWithAssociations = await Service.findByPk(newService.id, {
       include: [
-        { model: Questionsanswer, as: "serviceQA" },
+        { model: QuestionsAnswer, as: "serviceQA" },
         { model: Benefit, as: "benefits" },
         { model: Problem, as: "problems" },
         { model: Duration, as: "duration" },
@@ -255,19 +255,19 @@ const updateService = async (req, res) => {
 
     // Actualizar preguntas y respuestas
     if (questions.length > 0) {
-      await Questionsanswer.destroy({ where: { productId: id }, transaction });
+      await QuestionsAnswer.destroy({ where: { productId: id }, transaction });
       const qaRecords = questions.map((q) => ({
         question: q.question,
         answer: q.answer,
         productId: id,
       }));
 
-      await Questionsanswer.bulkCreate(qaRecords, { transaction });
+      await QuestionsAnswer.bulkCreate(qaRecords, { transaction });
     }
 
     // Actualizar tratamientos principales asociados
     if (mainTreatmentIds.length > 0) {
-      await Servicemaintreatment.destroy({
+      await ServiceMainTreatment.destroy({
         where: { serviceId: id },
         transaction,
       });
@@ -277,7 +277,7 @@ const updateService = async (req, res) => {
         mainTreatmentId: treatmentId,
       }));
 
-      await Servicemaintreatment.bulkCreate(treatmentAssociations, {
+      await ServiceMainTreatment.bulkCreate(treatmentAssociations, {
         transaction,
       });
     }
@@ -338,10 +338,10 @@ const deleteService = async (req, res) => {
       });
     }
 
-    await Questionsanswer.destroy({ where: { productId: id }, transaction });
+    await QuestionsAnswer.destroy({ where: { productId: id }, transaction });
 
     // Si tienes otras tablas relacionadas, también deberías eliminarlas aquí
-    await Servicemaintreatment.destroy({
+    await ServiceMainTreatment.destroy({
       where: { serviceId: id },
       transaction,
     });

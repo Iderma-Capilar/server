@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'NewsLetterRegister',
+    freezeTableName: true,
   });
   return NewsLetterRegister;
 };

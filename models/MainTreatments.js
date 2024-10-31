@@ -4,7 +4,7 @@ const { Model } = require("sequelize");
 const questionAnswerOptions = {
   foreignKey: "parentId",
   constraints: false,
-  as: "qa",
+  as: "mainTreatmentQA",
 };
 
 module.exports = (sequelize, DataTypes) => {
@@ -15,14 +15,14 @@ module.exports = (sequelize, DataTypes) => {
         scope: { parentType: "MainTreatments" },
       });
       MainTreatments.belongsToMany(models.Service, {
-        as: "services",
+        as: "service",
         through: models.ServiceMainTreatment,
         foreignKey: "mainTreatmentId",
         otherKey: "serviceId",
       });
       MainTreatments.hasMany(models.Complementary, {
         foreignKey: "mainTreatmentId",
-        as: "complementaryTreatments",
+        as: "complementary",
       });
       MainTreatments.hasMany(models.Benefit, {
         foreignKey: "mainTreatmentId",

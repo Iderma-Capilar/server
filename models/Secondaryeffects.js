@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "SecondaryEffects",
+      freezeTableName: true,
     }
   );
   return SecondaryEffects;

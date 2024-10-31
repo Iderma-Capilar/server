@@ -4,7 +4,7 @@ const { Model } = require("sequelize");
 const questionAnswerOptions = {
   foreignKey: "parentId",
   constraints: false,
-  as: "qa",
+  as: "technologyQA",
 };
 module.exports = (sequelize, DataTypes) => {
   class Technology extends Model {
@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "Technology",
+      freezeTableName: true,
     }
   );
   return Technology;
