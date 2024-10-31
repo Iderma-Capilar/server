@@ -1,28 +1,26 @@
 import dotenv from "dotenv";
 import { Sequelize } from "sequelize";
+import config from "../../config/config.js";
 dotenv.config();
 
-const { DATABASE_URL } = process.env;
+const enviroment = process.env.NODE_ENV || "development";
+const dbConfig = config[enviroment];
 
-const sequelize = new Sequelize(DATABASE_URL, {
-  dialect: "mysql",
-  logging: console.log,
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false,
-    },
-  },
-});
+const sequelize = new Sequelize(
+  dbConfig.database,
+  dbConfig.username,
+  dbConfig.password,
+  {
+    host: dbConfig.host,
+    dialect: dbConfig.dialect,
+  }
+);
 
 const connectToDatabase = async () => {
   try {
     await sequelize.authenticate();
     console.log("Connected to database");
-    await sequelize.query("SET FOREIGN_KEY_CHECKS = 0", null);
-    await sequelize.sync({ force: true });
-    await sequelize.query("SET FOREIGN_KEY_CHECKS = 1", null);
-
+    await sequelize.sync({ alter: true });
     console.log("All models were synchronized successfully.");
   } catch (err) {
     console.error("Error connecting to the database:", err);
