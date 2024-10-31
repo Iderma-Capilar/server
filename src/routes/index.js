@@ -1,15 +1,14 @@
-import { Router } from "express";
-import technologyRoutes from "../routes/technologyRouter.js";
-import serviceRoutes from "../routes/serviceRouter.js";
-import treatmentRouter from "../routes/treatmentRouter.js";
-import newsletterRouter from "../routes/newsletter.js"
+const { Router } = require("express");
+const technologyRoutes = require("../routes/technologyRouter");
+const serviceRoutes = require("../routes/serviceRouter");
+const treatmentRouter = require("../routes/treatmentRouter");
+const newsletterRouter = require("../routes/newsletter");
 
 const router = Router();
 
 router.use("/technology", technologyRoutes);
 router.use("/services", serviceRoutes);
 router.use("/treatment", treatmentRouter);
-router.use("/newsletter",  newsletterRouter);
+router.use("/newsletter", newsletterRouter);
 
-
-export default router;
+module.exports = router;

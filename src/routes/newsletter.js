@@ -1,9 +1,12 @@
-import { Router } from "express";
-import { newUser, getAllUsers } from "../controller/newsletterController/newsletterController.js";
+const { Router } = require("express");
+const {
+  newUser,
+  getAllUsers,
+} = require("../controller/newsletterController/newsletterController.js");
 
 const router = Router();
 
 router.post("/", newUser);
 router.get("/", getAllUsers);
 
-export default router;
+module.exports = router

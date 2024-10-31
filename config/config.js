@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+const dotenv = require("dotenv");
 dotenv.config();
 
 const {
@@ -11,7 +11,7 @@ const {
   MYSQL_DB_PROD_HOST,
   MYSQL_DB_PROD_PASSWORD,
   MYSQL_DB_PROD_PORT,
-  MYSQL_DB_LOCAL_PORT
+  MYSQL_DB_LOCAL_PORT,
 } = process.env;
 
 const config = {
@@ -40,4 +40,4 @@ const config = {
   },
 };
 
-export default config;
+module.exports = config;

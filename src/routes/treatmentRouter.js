@@ -1,11 +1,11 @@
-import { Router } from "express";
-import {
+const { Router } = require("express");
+const {
   createMainTreatment,
   deleteMainTreatment,
   getAllMainTreatments,
   getMainTreatmentById,
   updateMainTreatment,
-} from "../controller/treatment/treatmentController.js";
+} = require("../controller/treatment/treatmentController.js");
 
 const router = Router();
 
@@ -15,4 +15,4 @@ router.get("/:id", getMainTreatmentById);
 router.put("/:id", updateMainTreatment);
 router.delete("/:id", deleteMainTreatment);
 
-export default router;
+module.exports = router

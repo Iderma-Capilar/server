@@ -1,23 +1,20 @@
-import dotenv from "dotenv";
+const dotenv = require("dotenv");
 dotenv.config();
-import express from "express";
-import cors from "cors";
-import morgan from "morgan";
-import { createServer } from "http";
-import { createServer as createHttpsServer } from "https";
-import fs from "fs";
-import bodyParser from "body-parser";
-import compression from "compression";
+
+const express = require("express");
+const cors = require("cors");
+const morgan = require("morgan");
+const { createServer } = require("http");
+const { createServer: createHttpsServer } = require("https");
+const fs = require("fs");
+const bodyParser = require("body-parser");
+const compression = require("compression");
 
 const { NODE_LOCAL_PORT, NODE_LOCAL_HTTPS_PORT } = process.env;
-import routes from "./src/routes/index.js";
-import { connectToDatabase } from "./src/database/index.js";
+const routes = require("./src/routes/index");
+const { sequelize } = require("./src/utils/index");
 
-import "./src/database/models/associatons.js";
-//prueba para discord webhook
 const app = express();
-
-// Leer los certificados SSL
 const options = {
   key: fs.readFileSync("./ssl/privkey1.pem"),
   cert: fs.readFileSync("./ssl/fullchain1.pem"),
@@ -46,13 +43,15 @@ app.use("/", routes);
 
 app.get("/", (_req, res) => res.status(200).send("Server running"));
 
-connectToDatabase()
+sequelize
+  .authenticate()
   .then(() => {
-    // Escuchar en el puerto HTTP
+    console.log("Connected to the database");
+
     httpServer.listen(NODE_LOCAL_PORT, () => {
       console.log(`HTTP Server running on port ${NODE_LOCAL_PORT}`);
     });
-    // Escuchar en el puerto HTTPS
+
     httpsServer.listen(NODE_LOCAL_HTTPS_PORT, () => {
       console.log(`HTTPS Server running on port ${NODE_LOCAL_HTTPS_PORT}`);
     });

@@ -1,29 +1,30 @@
-import { sequelize } from "../../database/index.js";
-import QuestionAnswer from "../../database/models/qa/qa.js";
-import MainTreatment from "../../database/models/mainTreatment/mainTreatment.js";
-import Service from "../../database/models/servicios/services.js";
-import ServiceMainTreatment from "../../database/models/intermediate/serviceMainTreatment.js";
-import Benefit from "../../database/models/benefit/benefit.js";
-import SecondaryEffects from "../../database/models/duration/secondaryEffects.js";
-import Recommendations from "../../database/models/servicios/recommendations.js";
-import Duration from "../../database/models/duration/duration.js";
-import Complementary from "../../database/models/complementaryTreatments/complementary.js";
-import Problem from "../../database/models/problem/problem.js";
+const { sequelize } = require("../../utils/index.js");
+
+const Questionsanswer = require("../../../models/Questionsanswer.js");
+const Maintreatment = require("../../../models/Maintreatment.js");
+const Service = require("../../../models/Service.js");
+const Servicemaintreatment = require("../../../models/Servicemaintreatment.js");
+const Secondaryeffects = require("../../../models/Secondaryeffects.js");
+const Recommendations = require("../../../models/Recommendations.js");
+const Duration = require("../../../models/Duration.js");
+const Complementary = require("../../../models/Complementary.js");
+const Problem = require("../../../models/Problem.js");
+const Benefit = require("../../../models/Benefit.js");
 
 //--------------------------------------------------------------------------------------------
-export const getAllServices = async (_req, res) => {
+const getAllServices = async (_req, res) => {
   try {
     const services = await Service.findAll({
       include: [
-        { model: QuestionAnswer, as: "qa" },
+        { model: Questionsanswer, as: "qa" },
         { model: Problem, as: "problems" },
         { model: Benefit, as: "benefits" },
         {
-          model: MainTreatment,
+          model: Maintreatment,
           as: "associatedMainTreatments",
           include: [
             { model: Benefit, as: "benefits" },
-            { model: SecondaryEffects, as: "secondaryEffects" },
+            { model: Secondaryeffects, as: "secondaryEffects" },
             { model: Recommendations, as: "recommendations" },
             { model: Duration, as: "durations" },
             { model: Complementary, as: "complementaryTreatments" },
@@ -49,13 +50,13 @@ export const getAllServices = async (_req, res) => {
 
 //--------------------------------------------------------------------------------------------
 
-export const getServiceById = async (req, res) => {
+const getServiceById = async (req, res) => {
   try {
     const { id } = req.params;
     const service = await Service.findByPk(id, {
       include: [
-        { model: QuestionAnswer, as: "qa" },
-        { model: MainTreatment, as: "associatedMainTreatments" },
+        { model: Questionsanswer, as: "qa" },
+        { model: Maintreatment, as: "associatedMainTreatments" },
       ],
     });
 
@@ -84,7 +85,7 @@ export const getServiceById = async (req, res) => {
 //--------------------------------------------------------------------------------------------
 
 // CREAR SERVICIO NUEVO
-export const createService = async (req, res) => {
+const createService = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const {
@@ -135,7 +136,7 @@ export const createService = async (req, res) => {
         parentId: newService.id,
         parentType: "service",
       }));
-      await QuestionAnswer.bulkCreate(qaRecords, { transaction });
+      await Questionsanswer.bulkCreate(qaRecords, { transaction });
     }
 
     // Asignar beneficios
@@ -173,7 +174,7 @@ export const createService = async (req, res) => {
         serviceId: newService.id,
         mainTreatmentId: treatmentId,
       }));
-      await ServiceMainTreatment.bulkCreate(treatmentAssociations, {
+      await Servicemaintreatment.bulkCreate(treatmentAssociations, {
         transaction,
       });
     }
@@ -184,11 +185,11 @@ export const createService = async (req, res) => {
     // Obtener el servicio con todas las asociaciones
     const serviceWithAssociations = await Service.findByPk(newService.id, {
       include: [
-        { model: QuestionAnswer, as: "qa" },
+        { model: Questionsanswer, as: "qa" },
         { model: Benefit, as: "benefits" },
         { model: Problem, as: "problems" },
         { model: Duration, as: "duration" },
-        { model: MainTreatment, as: "associatedMainTreatments" },
+        { model: Maintreatment, as: "associatedMainTreatments" },
       ],
     });
 
@@ -214,7 +215,7 @@ export const createService = async (req, res) => {
 
 //--------------------------------------------------------------------------------------------
 
-export const updateService = async (req, res) => {
+const updateService = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
@@ -252,19 +253,19 @@ export const updateService = async (req, res) => {
 
     // Actualizar preguntas y respuestas
     if (questions.length > 0) {
-      await QuestionAnswer.destroy({ where: { productId: id }, transaction });
+      await Questionsanswer.destroy({ where: { productId: id }, transaction });
       const qaRecords = questions.map((q) => ({
         question: q.question,
         answer: q.answer,
         productId: id,
       }));
 
-      await QuestionAnswer.bulkCreate(qaRecords, { transaction });
+      await Questionsanswer.bulkCreate(qaRecords, { transaction });
     }
 
     // Actualizar tratamientos principales asociados
     if (mainTreatmentIds.length > 0) {
-      await ServiceMainTreatment.destroy({
+      await Servicemaintreatment.destroy({
         where: { serviceId: id },
         transaction,
       });
@@ -274,7 +275,7 @@ export const updateService = async (req, res) => {
         mainTreatmentId: treatmentId,
       }));
 
-      await ServiceMainTreatment.bulkCreate(treatmentAssociations, {
+      await Servicemaintreatment.bulkCreate(treatmentAssociations, {
         transaction,
       });
     }
@@ -286,7 +287,7 @@ export const updateService = async (req, res) => {
     const updatedService = await Service.findByPk(id, {
       include: [
         {
-          model: MainTreatment,
+          model: Maintreatment,
           as: "associatedMainTreatments",
           required: false,
         },
@@ -321,7 +322,7 @@ export const updateService = async (req, res) => {
 
 //--------------------------------------------------------------------------------------------
 
-export const deleteService = async (req, res) => {
+const deleteService = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
@@ -335,10 +336,10 @@ export const deleteService = async (req, res) => {
       });
     }
 
-    await QuestionAnswer.destroy({ where: { productId: id }, transaction });
+    await Questionsanswer.destroy({ where: { productId: id }, transaction });
 
     // Si tienes otras tablas relacionadas, también deberías eliminarlas aquí
-    await ServiceMainTreatment.destroy({
+    await Servicemaintreatment.destroy({
       where: { serviceId: id },
       transaction,
     });
@@ -365,4 +366,12 @@ export const deleteService = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+module.exports = {
+  getAllServices,
+  getServiceById,
+  createService,
+  updateService,
+  deleteService,
 };

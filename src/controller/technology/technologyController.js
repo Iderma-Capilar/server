@@ -1,7 +1,7 @@
-import Technology from "../../database/models/technology/technology.js";
+const Technology = require("../../../models/Technology");
 
 // Crear una nueva tecnología
-export const createTechnology = async (req, res) => {
+const createTechnology = async (req, res) => {
   try {
     const technology = await Technology.create(req.body);
     res.status(201).json(technology);
@@ -12,7 +12,7 @@ export const createTechnology = async (req, res) => {
 };
 
 // Obtener todas las tecnologías
-export const getAllTechnologies = async (req, res) => {
+const getAllTechnologies = async (req, res) => {
   try {
     const technologies = await Technology.findAll({
       include: [],
@@ -25,7 +25,7 @@ export const getAllTechnologies = async (req, res) => {
 };
 
 // Obtener una tecnología por ID
-export const getTechnologyById = async (req, res) => {
+const getTechnologyById = async (req, res) => {
   try {
     const { id } = req.params;
     const technology = await Technology.findByPk(id, {
@@ -43,7 +43,7 @@ export const getTechnologyById = async (req, res) => {
 };
 
 // Actualizar una tecnología por ID
-export const updateTechnology = async (req, res) => {
+const updateTechnology = async (req, res) => {
   try {
     const { id } = req.params;
     const [updated] = await Technology.update(req.body, {
@@ -65,7 +65,7 @@ export const updateTechnology = async (req, res) => {
 };
 
 // Eliminar una tecnología por ID
-export const deleteTechnology = async (req, res) => {
+const deleteTechnology = async (req, res) => {
   try {
     const { id } = req.params;
     const deleted = await Technology.destroy({
@@ -81,4 +81,12 @@ export const deleteTechnology = async (req, res) => {
     console.error("Error deleting technology:", error);
     res.status(500).json({ error: "Failed to delete technology" });
   }
+};
+
+module.exports = {
+  createTechnology,
+  getTechnologyById,
+  updateTechnology,
+  deleteTechnology,
+  getAllTechnologies
 };

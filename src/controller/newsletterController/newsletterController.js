@@ -1,8 +1,10 @@
-import dotenv from "dotenv";
-import { sequelize } from "../../database/index.js";
-import mailchimp from "@mailchimp/mailchimp_marketing";
-import NewsLetterRegister from "../../database/models/newsletter/newsletter.js";
+const dotenv = require("dotenv");
+const { sequelize } = require("../../utils/index.js");
+const mailchimp = require("@mailchimp/mailchimp_marketing");
+const Newsletterregister = require("../../../models/Newsletterregister.js");
+
 dotenv.config();
+
 const { MAILCHIMP_API_KEY, MAILCHIMP_SERVER, MAILCHIMP_LIST_ID } = process.env;
 
 mailchimp.setConfig({
@@ -10,12 +12,12 @@ mailchimp.setConfig({
   server: MAILCHIMP_SERVER,
 });
 
-export const newUser = async (req, res) => {
+const newUser = async (req, res) => {
   const { email } = req.body;
   const transacción = await sequelize.transaction();
 
   try {
-    const user = await NewsLetterRegister.create(
+    const user = await Newsletterregister.create(
       { email },
       { transaction: transacción }
     );
@@ -43,7 +45,7 @@ export const newUser = async (req, res) => {
   }
 };
 
-export const getAllUsers = async (_req, res) => {
+const getAllUsers = async (_req, res) => {
   try {
     const users = await NewsLetterRegister.findAll();
     res.status(200).json({
@@ -58,3 +60,8 @@ export const getAllUsers = async (_req, res) => {
     });
   }
 };
+
+module.exports = {
+  newUser,
+  getAllUsers,
+}

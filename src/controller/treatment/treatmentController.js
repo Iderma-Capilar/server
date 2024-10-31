@@ -1,13 +1,12 @@
-import { sequelize } from "../../database/index.js";
-import Benefit from "../../database/models/benefit/benefit.js";
-import Complementary from "../../database/models/complementaryTreatments/complementary.js";
-import Duration from "../../database/models/duration/duration.js";
-import SecondaryEffects from "../../database/models/duration/secondaryEffects.js";
-import MainTreatment from "../../database/models/mainTreatment/mainTreatment.js";
-import Recommendations from "../../database/models/servicios/recommendations.js";
+const Benefit = require("../../../models/Benefit");
+const Complementary = require("../../../models/Complementary");
+const Duration = require("../../../models/Duration");
+const Maintreatment = require("../../../models/Maintreatment");
+const Recommendations = require("../../../models/Recommendations");
+const Secondaryeffects = require("../../../models/Secondaryeffects");
 
 // CREAR TRATAMIENTO PRINCIPAL
-export const createMainTreatment = async (req, res) => {
+const createMainTreatment = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const {
@@ -37,7 +36,7 @@ export const createMainTreatment = async (req, res) => {
       });
     }
 
-    const newMainTreatment = await MainTreatment.create(
+    const newMainTreatment = await Maintreatment.create(
       {
         type,
         effectiveness,
@@ -59,7 +58,7 @@ export const createMainTreatment = async (req, res) => {
 
     // Asignar efectos secundarios
     if (secondaryEffects.length > 0) {
-      await SecondaryEffects.bulkCreate(
+      await Secondaryeffects.bulkCreate(
         secondaryEffects.map((effect) => ({
           ...effect,
           mainTreatmentId: newMainTreatment.id,
@@ -100,10 +99,10 @@ export const createMainTreatment = async (req, res) => {
     await transaction.commit();
 
     // Obtener el tratamiento completo con todas sus relaciones
-    const createdTreatment = await MainTreatment.findByPk(newMainTreatment.id, {
+    const createdTreatment = await Maintreatment.findByPk(newMainTreatment.id, {
       include: [
         { model: Benefit, as: "benefits" },
-        { model: SecondaryEffects, as: "secondaryEffects" },
+        { model: Secondaryeffects, as: "secondaryEffects" },
         { model: Recommendations, as: "recommendations" },
         { model: Duration, as: "durations" },
         { model: Complementary, as: "complementaryTreatments" },
@@ -129,12 +128,12 @@ export const createMainTreatment = async (req, res) => {
 };
 
 // OBTENER TODOS LOS TRATAMIENTOS PRINCIPALES
-export const getAllMainTreatments = async (req, res) => {
+const getAllMainTreatments = async (req, res) => {
   try {
-    const mainTreatments = await MainTreatment.findAll({
+    const mainTreatments = await Maintreatment.findAll({
       include: [
         { model: Benefit, as: "benefits" },
-        { model: SecondaryEffects, as: "secondaryEffects" },
+        { model: Secondaryeffects, as: "secondaryEffects" },
         { model: Recommendations, as: "recommendations" },
         { model: Duration, as: "durations" },
         { model: Complementary, as: "complementaryTreatments" },
@@ -157,13 +156,13 @@ export const getAllMainTreatments = async (req, res) => {
 };
 
 // OBTENER UN TRATAMIENTO PRINCIPAL POR ID
-export const getMainTreatmentById = async (req, res) => {
+const getMainTreatmentById = async (req, res) => {
   try {
     const { id } = req.params;
-    const mainTreatment = await MainTreatment.findByPk(id, {
+    const mainTreatment = await Maintreatment.findByPk(id, {
       include: [
         { model: Benefit, as: "benefits" },
-        { model: SecondaryEffects, as: "secondaryEffects" },
+        { model: Secondaryeffects, as: "secondaryEffects" },
         { model: Recommendations, as: "recommendations" },
         { model: Duration, as: "durations" },
         { model: Complementary, as: "complementaryTreatments" },
@@ -194,7 +193,7 @@ export const getMainTreatmentById = async (req, res) => {
 };
 
 // ACTUALIZAR TRATAMIENTO PRINCIPAL
-export const updateMainTreatment = async (req, res) => {
+const updateMainTreatment = async (req, res) => {
   const { id } = req.params;
 
   const transaction = await sequelize.transaction();
@@ -209,7 +208,7 @@ export const updateMainTreatment = async (req, res) => {
       complementary = [],
     } = req.body;
 
-    const mainTreatment = await MainTreatment.findByPk(id);
+    const mainTreatment = await Maintreatment.findByPk(id);
 
     if (!mainTreatment) {
       return res.status(404).json({
@@ -311,12 +310,12 @@ export const updateMainTreatment = async (req, res) => {
 };
 
 // ELIMINAR TRATAMIENTO PRINCIPAL
-export const deleteMainTreatment = async (req, res) => {
+const deleteMainTreatment = async (req, res) => {
   const { id } = req.params;
 
   const transaction = await sequelize.transaction();
   try {
-    const mainTreatment = await MainTreatment.findByPk(id);
+    const mainTreatment = await Maintreatment.findByPk(id);
 
     if (!mainTreatment) {
       return res.status(404).json({
@@ -348,4 +347,12 @@ export const deleteMainTreatment = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+module.exports = {
+  createMainTreatment,
+  getAllMainTreatments,
+  getMainTreatmentById,
+  updateMainTreatment,
+  deleteMainTreatment,
 };

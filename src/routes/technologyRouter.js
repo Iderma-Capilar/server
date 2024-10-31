@@ -1,11 +1,11 @@
-import { Router } from "express";
-import {
+const { Router } = require("express");
+const {
   createTechnology,
   deleteTechnology,
   getAllTechnologies,
   getTechnologyById,
   updateTechnology,
-} from "../controller/technology/technologyController.js";
+} = require("../controller/technology/technologyController.js");
 
 const router = Router();
 
@@ -15,4 +15,4 @@ router.get("/technologies/:id", getTechnologyById);
 router.put("/technologies/:id", updateTechnology);
 router.delete("/technologies/:id", deleteTechnology);
 
-export default router;
+module.exports = router
