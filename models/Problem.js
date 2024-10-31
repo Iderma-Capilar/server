@@ -13,6 +13,8 @@ module.exports = (sequelize, DataTypes) => {
     {
       description: DataTypes.TEXT,
       solution: DataTypes.JSON,
+      serviceId: DataTypes.INTEGER,
+      mainTreatmentId: DataTypes.INTEGER,
     },
     {
       sequelize,

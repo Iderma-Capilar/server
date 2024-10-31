@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
   Recommendations.init(
     {
       description: DataTypes.TEXT,
+      mainTreatmentId: DataTypes.INTEGER,
     },
     {
       sequelize,

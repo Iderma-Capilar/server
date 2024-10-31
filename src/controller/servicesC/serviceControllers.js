@@ -20,7 +20,7 @@ const getAllServices = async (_req, res) => {
       include: [
         { model: QuestionsAnswer, as: "serviceQA" },
         { model: Problem, as: "problems" },
-        // { model: Benefit, as: "benefits" },
+        { model: Benefit, as: "benefits" },
         {
           model: MainTreatments,
           as: "associatedMainTreatments",

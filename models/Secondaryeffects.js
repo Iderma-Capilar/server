@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       SecondaryEffects.belongsTo(models.MainTreatments, {
         foreignKey: "mainTreatmentId",
+        as: "mainTreatment",
       });
     }
   }
@@ -13,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       name: DataTypes.STRING,
       description: DataTypes.TEXT,
-      mainTreatmenId: DataTypes.INTEGER,
+      mainTreatmentId: DataTypes.INTEGER,
     },
     {
       sequelize,

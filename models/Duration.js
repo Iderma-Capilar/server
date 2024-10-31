@@ -18,6 +18,8 @@ module.exports = (sequelize, DataTypes) => {
       duration_sessions: DataTypes.STRING,
       sessions_quantity: DataTypes.INTEGER,
       sessions_interval: DataTypes.STRING,
+      mainTreatmentId: DataTypes.INTEGER,
+      serviceId: DataTypes.INTEGER,
     },
     {
       sequelize,
