@@ -1,7 +1,6 @@
 const { sequelize } = require("../../utils/index.js");
 
 const Questionsanswer = require("../../../models/Questionsanswer.js");
-const Maintreatment = require("../../../models/Maintreatment.js");
 const Service = require("../../../models/Service.js");
 const Servicemaintreatment = require("../../../models/Servicemaintreatment.js");
 const Secondaryeffects = require("../../../models/Secondaryeffects.js");
@@ -10,6 +9,7 @@ const Duration = require("../../../models/Duration.js");
 const Complementary = require("../../../models/Complementary.js");
 const Problem = require("../../../models/Problem.js");
 const Benefit = require("../../../models/Benefit.js");
+const MainTreatments = require("../../../models/MainTreatments.js");
 
 //--------------------------------------------------------------------------------------------
 const getAllServices = async (_req, res) => {
@@ -20,7 +20,7 @@ const getAllServices = async (_req, res) => {
         { model: Problem, as: "problems" },
         { model: Benefit, as: "benefits" },
         {
-          model: Maintreatment,
+          model: MainTreatments,
           as: "associatedMainTreatments",
           include: [
             { model: Benefit, as: "benefits" },
@@ -56,7 +56,7 @@ const getServiceById = async (req, res) => {
     const service = await Service.findByPk(id, {
       include: [
         { model: Questionsanswer, as: "qa" },
-        { model: Maintreatment, as: "associatedMainTreatments" },
+        { model: MainTreatments, as: "associatedMainTreatments" },
       ],
     });
 
@@ -189,7 +189,7 @@ const createService = async (req, res) => {
         { model: Benefit, as: "benefits" },
         { model: Problem, as: "problems" },
         { model: Duration, as: "duration" },
-        { model: Maintreatment, as: "associatedMainTreatments" },
+        { model: MainTreatments, as: "associatedMainTreatments" },
       ],
     });
 
@@ -287,7 +287,7 @@ const updateService = async (req, res) => {
     const updatedService = await Service.findByPk(id, {
       include: [
         {
-          model: Maintreatment,
+          model: MainTreatments,
           as: "associatedMainTreatments",
           required: false,
         },

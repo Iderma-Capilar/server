@@ -1,7 +1,7 @@
 const Benefit = require("../../../models/Benefit");
 const Complementary = require("../../../models/Complementary");
 const Duration = require("../../../models/Duration");
-const Maintreatment = require("../../../models/Maintreatment");
+const MainTreatments = require("../../../models/MainTreatments");
 const Recommendations = require("../../../models/Recommendations");
 const Secondaryeffects = require("../../../models/Secondaryeffects");
 
@@ -36,7 +36,7 @@ const createMainTreatment = async (req, res) => {
       });
     }
 
-    const newMainTreatment = await Maintreatment.create(
+    const newMainTreatment = await MainTreatments.create(
       {
         type,
         effectiveness,
@@ -130,7 +130,7 @@ const createMainTreatment = async (req, res) => {
 // OBTENER TODOS LOS TRATAMIENTOS PRINCIPALES
 const getAllMainTreatments = async (req, res) => {
   try {
-    const mainTreatments = await Maintreatment.findAll({
+    const mainTreatments = await MainTreatments.findAll({
       include: [
         { model: Benefit, as: "benefits" },
         { model: Secondaryeffects, as: "secondaryEffects" },
@@ -159,7 +159,7 @@ const getAllMainTreatments = async (req, res) => {
 const getMainTreatmentById = async (req, res) => {
   try {
     const { id } = req.params;
-    const mainTreatment = await Maintreatment.findByPk(id, {
+    const mainTreatment = await MainTreatments.findByPk(id, {
       include: [
         { model: Benefit, as: "benefits" },
         { model: Secondaryeffects, as: "secondaryEffects" },
@@ -208,7 +208,7 @@ const updateMainTreatment = async (req, res) => {
       complementary = [],
     } = req.body;
 
-    const mainTreatment = await Maintreatment.findByPk(id);
+    const mainTreatment = await MainTreatments.findByPk(id);
 
     if (!mainTreatment) {
       return res.status(404).json({
@@ -249,13 +249,13 @@ const updateMainTreatment = async (req, res) => {
     // Actualizar los efectos secundarios
     if (secondaryEffects.length > 0) {
       // Eliminar los efectos secundarios existentes
-      await SecondaryEffects.destroy({
+      await Secondaryeffects.destroy({
         where: { mainTreatmentId: id },
         transaction,
       });
 
       // Crear los nuevos efectos secundarios
-      await SecondaryEffects.bulkCreate(
+      await secondaryEffects.bulkCreate(
         secondaryEffects.map((effect) => ({
           ...effect,
           mainTreatmentId: id,
@@ -315,7 +315,7 @@ const deleteMainTreatment = async (req, res) => {
 
   const transaction = await sequelize.transaction();
   try {
-    const mainTreatment = await Maintreatment.findByPk(id);
+    const mainTreatment = await MainTreatments.findByPk(id);
 
     if (!mainTreatment) {
       return res.status(404).json({
