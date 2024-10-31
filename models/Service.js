@@ -1,11 +1,5 @@
 "use strict";
 const { Model } = require("sequelize");
-const Questionsanswer = require("./Questionsanswer");
-const Servicemaintreatment = require("./Servicemaintreatment");
-const Benefit = require("./Benefit");
-const Problem = require("./Problem");
-const Duration = require("./Duration");
-const MainTreatments = require("./MainTreatments");
 
 const questionAnswerOptions = {
   foreignKey: "parentId",
@@ -14,31 +8,26 @@ const questionAnswerOptions = {
 };
 module.exports = (sequelize, DataTypes) => {
   class Service extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      Service.hasMany(Questionsanswer, {
+      Service.hasMany(models.QuestionsAnswer, {
         ...questionAnswerOptions,
         scope: { parentType: "service" },
       });
-      Service.belongsToMany(MainTreatments, {
+      Service.belongsToMany(models.MainTreatments, {
         as: "associatedMainTreatments",
-        through: Servicemaintreatment,
+        through: models.ServiceMainTreatment,
         foreignKey: "serviceId",
         otherKey: "mainTreatmentId",
       });
-      Service.hasMany(Benefit, {
+      Service.hasMany(models.Benefit, {
         foreignKey: "serviceId",
         as: "benefits",
       });
-      Service.hasMany(Problem, {
+      Service.hasMany(models.Problem, {
         foreignKey: "serviceId",
         as: "problems",
       });
-      Service.hasMany(Duration, {
+      Service.hasMany(models.Duration, {
         foreignKey: "serviceId",
         as: "duration",
       });

@@ -1,22 +1,24 @@
 const { sequelize } = require("../../utils/index.js");
 
-const Questionsanswer = require("../../../models/Questionsanswer.js");
-const Service = require("../../../models/Service.js");
-const Servicemaintreatment = require("../../../models/Servicemaintreatment.js");
-const Secondaryeffects = require("../../../models/Secondaryeffects.js");
-const Recommendations = require("../../../models/Recommendations.js");
-const Duration = require("../../../models/Duration.js");
-const Complementary = require("../../../models/Complementary.js");
-const Problem = require("../../../models/Problem.js");
-const Benefit = require("../../../models/Benefit.js");
-const MainTreatments = require("../../../models/MainTreatments.js");
+const {
+  Questionsanswer,
+  Service,
+  Servicemaintreatment,
+  Secondaryeffects,
+  Recommendations,
+  Duration,
+  Complementary,
+  Problem,
+  Benefit,
+  MainTreatments,
+} = require("../../../models");
 
 //--------------------------------------------------------------------------------------------
 const getAllServices = async (_req, res) => {
   try {
     const services = await Service.findAll({
       include: [
-        { model: Questionsanswer, as: "qa" },
+        { model: Questionsanswer, as: "serviceQA" },
         { model: Problem, as: "problems" },
         { model: Benefit, as: "benefits" },
         {
@@ -55,7 +57,7 @@ const getServiceById = async (req, res) => {
     const { id } = req.params;
     const service = await Service.findByPk(id, {
       include: [
-        { model: Questionsanswer, as: "qa" },
+        { model: Questionsanswer, as: "serviceQA" },
         { model: MainTreatments, as: "associatedMainTreatments" },
       ],
     });
@@ -185,7 +187,7 @@ const createService = async (req, res) => {
     // Obtener el servicio con todas las asociaciones
     const serviceWithAssociations = await Service.findByPk(newService.id, {
       include: [
-        { model: Questionsanswer, as: "qa" },
+        { model: Questionsanswer, as: "serviceQA" },
         { model: Benefit, as: "benefits" },
         { model: Problem, as: "problems" },
         { model: Duration, as: "duration" },

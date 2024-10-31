@@ -1,10 +1,10 @@
 "use strict";
 const { Model } = require("sequelize");
-const Maintreatment = require("./MainTreatments");
+
 module.exports = (sequelize, DataTypes) => {
   class SecondaryEffects extends Model {
     static associate(models) {
-      SecondaryEffects.belongsTo(Maintreatment, {
+      SecondaryEffects.belongsTo(models.MainTreatments, {
         foreignKey: "mainTreatmentId",
       });
     }

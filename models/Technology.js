@@ -1,6 +1,5 @@
 "use strict";
 const { Model } = require("sequelize");
-const Questionsanswer = require("./Questionsanswer");
 
 const questionAnswerOptions = {
   foreignKey: "parentId",
@@ -10,7 +9,7 @@ const questionAnswerOptions = {
 module.exports = (sequelize, DataTypes) => {
   class Technology extends Model {
     static associate(models) {
-      Technology.hasMany(Questionsanswer, {
+      Technology.hasMany(models.QuestionsAnswer, {
         ...questionAnswerOptions,
         scope: { parentType: "technology" },
       });

@@ -1,4 +1,4 @@
-const Technology = require("../../../models/Technology");
+const { Technology } = require("../../../models");
 
 // Crear una nueva tecnología
 const createTechnology = async (req, res) => {
@@ -88,5 +88,5 @@ module.exports = {
   getTechnologyById,
   updateTechnology,
   deleteTechnology,
-  getAllTechnologies
+  getAllTechnologies,
 };

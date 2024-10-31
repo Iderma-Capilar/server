@@ -1,9 +1,11 @@
-const Benefit = require("../../../models/Benefit");
-const Complementary = require("../../../models/Complementary");
-const Duration = require("../../../models/Duration");
-const MainTreatments = require("../../../models/MainTreatments");
-const Recommendations = require("../../../models/Recommendations");
-const Secondaryeffects = require("../../../models/Secondaryeffects");
+const {
+  Benefit,
+  Complementary,
+  Duration,
+  MainTreatments,
+  Recommendations,
+  Secondaryeffects,
+} = require("../../../models");
 
 // CREAR TRATAMIENTO PRINCIPAL
 const createMainTreatment = async (req, res) => {

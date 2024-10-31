@@ -1,7 +1,7 @@
 const dotenv = require("dotenv");
 const { sequelize } = require("../../utils/index.js");
 const mailchimp = require("@mailchimp/mailchimp_marketing");
-const Newsletterregister = require("../../../models/Newsletterregister.js");
+const { Newsletterregister } = require("../../../models");
 
 dotenv.config();
 
@@ -47,7 +47,7 @@ const newUser = async (req, res) => {
 
 const getAllUsers = async (_req, res) => {
   try {
-    const users = await NewsLetterRegister.findAll();
+    const users = await Newsletterregister.findAll();
     res.status(200).json({
       message: "Usuarios obtenidos exitosamente",
       users,
@@ -64,4 +64,4 @@ const getAllUsers = async (_req, res) => {
 module.exports = {
   newUser,
   getAllUsers,
-}
+};

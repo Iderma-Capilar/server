@@ -1,10 +1,9 @@
 "use strict";
 const { Model } = require("sequelize");
-const Service = require("./Service");
 module.exports = (sequelize, DataTypes) => {
   class Problem extends Model {
     static associate(models) {
-      Problem.belongsTo(Service, {
+      Problem.belongsTo(models.Service, {
         foreignKey: "serviceId",
         as: "service",
       });

@@ -1,59 +1,52 @@
 "use strict";
 const { Model } = require("sequelize");
-const Questionsanswer = require("./Questionsanswer");
-const Service = require("./Service");
-const Servicemaintreatment = require("./Servicemaintreatment");
-const Complementary = require("./Complementary");
-const Benefit = require("./Benefit");
-const Recommendations = require("./Recommendations");
-const Duration = require("./Duration");
-const Technology = require("./Technology");
-const Secondaryeffects = require("./Secondaryeffects");
 
 const questionAnswerOptions = {
   foreignKey: "parentId",
   constraints: false,
   as: "qa",
 };
+
 module.exports = (sequelize, DataTypes) => {
   class MainTreatments extends Model {
     static associate(models) {
-      MainTreatments.hasMany(Questionsanswer, {
+      MainTreatments.hasMany(models.QuestionsAnswer, {
         ...questionAnswerOptions,
         scope: { parentType: "MainTreatments" },
       });
-      MainTreatments.belongsToMany(Service, {
+      MainTreatments.belongsToMany(models.Service, {
         as: "services",
-        through: Servicemaintreatment,
+        through: models.ServiceMainTreatment,
         foreignKey: "mainTreatmentId",
         otherKey: "serviceId",
       });
-      MainTreatments.hasMany(Complementary, {
+      MainTreatments.hasMany(models.Complementary, {
         foreignKey: "mainTreatmentId",
         as: "complementaryTreatments",
       });
-      MainTreatments.hasMany(Benefit, {
+      MainTreatments.hasMany(models.Benefit, {
         foreignKey: "mainTreatmentId",
         as: "benefits",
       });
-      MainTreatments.hasMany(Recommendations, {
+      MainTreatments.hasMany(models.Recommendations, {
         foreignKey: "mainTreatmentId",
         as: "recommendations",
       });
-      MainTreatments.hasMany(Duration, {
+      MainTreatments.hasMany(models.Duration, {
         foreignKey: "mainTreatmentId",
         as: "durations",
       });
-      MainTreatments.hasMany(Technology, {
+      MainTreatments.hasMany(models.Technology, {
         foreignKey: "mainTreatmentId",
         as: "technologies",
       });
-      MainTreatments.hasMany(Secondaryeffects, {
+      MainTreatments.hasMany(models.SecondaryEffects, {
         foreignKey: "mainTreatmentId",
         as: "secondaryEffects",
       });
     }
   }
+
   MainTreatments.init(
     {
       type: DataTypes.STRING,
@@ -67,5 +60,6 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "MainTreatments",
     }
   );
+
   return MainTreatments;
 };

@@ -1,28 +1,23 @@
 "use strict";
 const { Model } = require("sequelize");
-const Service = require("./Service");
-const Technology = require("./Technology");
-const Maintreatment = require("./MainTreatments");
 
 module.exports = (sequelize, DataTypes) => {
   class QuestionsAnswer extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      QuestionsAnswer.belongsTo(Service, {
+      QuestionsAnswer.belongsTo(models.Service, {
         foreignKey: "parentId",
         constraints: false,
+        as: "serviceQA",
       });
-      QuestionsAnswer.belongsTo(Technology, {
+      QuestionsAnswer.belongsTo(models.Technology, {
         foreignKey: "parentId",
         constraints: false,
+        as: "technologyQA",
       });
-      QuestionsAnswer.belongsTo(Maintreatment, {
+      QuestionsAnswer.belongsTo(models.MainTreatments, {
         foreignKey: "parentId",
         constraints: false,
+        as: "mainTreatmentQA",
       });
     }
   }
